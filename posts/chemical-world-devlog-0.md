@@ -25,9 +25,7 @@
 
 以最简单的燃烧为例，把反应建模为「反应物配比 → 条件判定 → 产物 + 能量」：
 
-$$
-\text{CH}_4 + 2\,\text{O}_2 \rightarrow \text{CO}_2 + 2\,\text{H}_2\text{O} + \Delta E
-$$
+$\text{CH}_4 + 2\,\text{O}_2 \rightarrow \text{CO}_2 + 2\,\text{H}_2\text{O} + \Delta E$
 
 关键是 $\Delta E$ 要真的参与热量系统 —— 反应放热会升高环境温度，温度又反过来影响后续反应的启动条件。**化学和工业逻辑互相咬合**，这才是"硬核"的意思。
 
