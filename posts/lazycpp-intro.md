@@ -28,9 +28,7 @@ int main() {
 
 惰性求值的核心是把「计算」推迟到真正需要结果的那一刻，配合 C++ 的模板可以在编译期完成很多分发：
 
-$$
-\text{lazy}(f) \equiv \lambda x.\, f(x) \ \text{evaluated on demand}
-$$
+$\text{lazy}(f) \equiv \lambda x.\, f(x) \ \text{evaluated on demand}$
 
 模板元编程里常见的 `if constexpr` 分发、SFINAE 检测，都是让"懒"成立的基础设施。
 
