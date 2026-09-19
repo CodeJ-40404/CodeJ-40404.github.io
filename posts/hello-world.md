@@ -12,17 +12,13 @@
 
 质能方程：
 
-$$
-E = mc^2
-$$
+$E = mc^2$
 
 算法复杂度是 $O(n \log n)$，欧拉公式 $e^{i\pi} + 1 = 0$ 是数学里最浪漫的一行。
 
 高斯积分：
 
-$$
-\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
-$$
+$\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}$
 
 ## 代码演示
 
