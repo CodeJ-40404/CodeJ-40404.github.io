@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "hello-world",
+    "title": "你好，世界：博客系统上线",
+    "date": "2026-09-19",
+    "tag": "META"
+  },
+  {
+    "slug": "chemical-world-devlog-0",
+    "title": "Chemical-World 开发日志 #0：从零开始的化工厂",
+    "date": "2026-08-30",
+    "tag": "DEVLOG"
+  },
+  {
+    "slug": "lazycpp-intro",
+    "title": "lazycpp：如何用一个头文件偷懒到底",
+    "date": "2026-07-12",
+    "tag": "CPP"
+  }
+]

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CodeJ-40404 的博客文章">
+  <title>文章 // CodeJ-40404</title>
+  <script>
+    // 尽早应用已保存的主题，避免闪烁
+    try { document.documentElement.dataset.theme = localStorage.getItem('codej-theme') || 'cyber'; } catch (e) {}
+  </script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- KaTeX（数学公式） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <!-- highlight.js 代码高亮 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <canvas id="stars"></canvas>
+  <canvas id="trail"></canvas>
+  <div class="grid-bg"></div>
+  <div class="scanlines"></div>
+  <div class="flicker"></div>
+
+  <!-- 导航 -->
+  <header class="nav">
+    <a class="logo" href="index.html">CODEJ<span class="slash">://</span>40404</a>
+    <nav class="nav-links">
+      <a href="index.html#blog">&lt;&lt; BLOG</a>
+      <a href="index.html">HOME</a>
+    </nav>
+    <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换主题"></button>
+  </header>
+
+  <main class="article-wrap">
+    <article>
+      <div class="article-meta">
+        <span id="post-date">[..]</span>
+        <span id="post-tag" class="post-tag">POST</span>
+        <span>// codej@40404</span>
+      </div>
+      <h1 class="article-title" id="post-title">LOADING...</h1>
+      <div id="post-content" class="prose">
+        <p>正在加载文章内容 ...</p>
+      </div>
+      <a class="article-back" href="index.html#blog">&lt;&lt; BACK_TO_BLOG</a>
+    </article>
+  </main>
+
+  <footer>
+    <span class="hl">© 2026 CodeJ-40404</span> // POWERED BY MARKDOWN + KATEX
+  </footer>
+</body>
+</html>
