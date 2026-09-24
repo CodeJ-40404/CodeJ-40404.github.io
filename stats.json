@@ -1,20 +1,40 @@
 {
-  "updated_at": "2026-09-24T00:00:00.000Z",
+  "updated_at": "2026-09-24T14:54:53.494Z",
   "user": {
     "login": "CodeJ-40404",
-    "repos": 5,
-    "followers": 3,
-    "stars": 9
+    "repos": 8,
+    "followers": 18,
+    "stars": 13
   },
   "contributions": {
-    "total": 428,
-    "currentStreak": 6,
-    "longestStreak": 23
+    "total": 120,
+    "currentStreak": 0,
+    "longestStreak": 5
   },
   "langs": [
-    { "name": "C++", "pct": 82.4 },
-    { "name": "HTML", "pct": 9.1 },
-    { "name": "Python", "pct": 5.2 },
-    { "name": "Markdown", "pct": 3.3 }
+    {
+      "name": "C++",
+      "pct": 80.4
+    },
+    {
+      "name": "HTML",
+      "pct": 12.9
+    },
+    {
+      "name": "Python",
+      "pct": 2.5
+    },
+    {
+      "name": "JavaScript",
+      "pct": 2
+    },
+    {
+      "name": "CSS",
+      "pct": 2
+    },
+    {
+      "name": "C",
+      "pct": 0.2
+    }
   ]
 }
