@@ -297,4 +297,158 @@
         '<p><a href="index.html#blog">&lt;&lt; 返回博客列表</a></p>';
     });
   }
+
+  /* ================= GitHub 统计（stats.json 同源渲染） ================= */
+  var LANG_COLORS = {
+    'C++': '#f34b7d', C: '#555555', Python: '#3572A5', JavaScript: '#f1e05a',
+    TypeScript: '#3178c6', HTML: '#e34c26', CSS: '#563d7c', 'Jupyter Notebook': '#DA5B0B',
+    Java: '#b07219', Go: '#00ADD8', Rust: '#dea584', Shell: '#89e051',
+    Markdown: '#083fa1', Lua: '#000080', Vue: '#41b883', 'C#': '#178600',
+    CMake: '#DA3434', Makefile: '#427819', PowerShell: '#012456', Batchfile: '#C1F12E',
+    MATLAB: '#e16737', GDScript: '#355570', Swift: '#F05138', Kotlin: '#A97BFF',
+    Dart: '#00B4AB', PHP: '#4F5D95', Ruby: '#701516', 'Objective-C': '#438eff'
+  };
+
+  var statOverview = document.getElementById('stat-overview');
+  if (statOverview) {
+    fetch('stats.json')
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (s) {
+        var d = s.user || {}, c = s.contributions || {}, langs = s.langs || [];
+
+        statOverview.innerHTML =
+          '<div class="stat-nums">' +
+          '<div><span class="k">REPOS</span><span class="n">' + (d.repos != null ? d.repos : '-') + '</span></div>' +
+          '<div><span class="k">STARS</span><span class="n warm">' + (d.stars != null ? d.stars : '-') + '</span></div>' +
+          '<div><span class="k">FOLLOWERS</span><span class="n hot">' + (d.followers != null ? d.followers : '-') + '</span></div>' +
+          '</div>' +
+          '<div class="stat-updated">UPDATED ' + (s.updated_at ? s.updated_at.slice(0, 10) : '-') + '</div>';
+
+        var contribs = document.getElementById('stat-contribs');
+        if (contribs) {
+          contribs.innerHTML =
+            '<div class="stat-nums">' +
+            '<div><span class="k">THIS_YEAR</span><span class="n">' + (c.total != null ? c.total : '-') + '</span></div>' +
+            '<div><span class="k">STREAK</span><span class="n warm">' + (c.currentStreak != null ? c.currentStreak : '-') + '<small style="font-size:.5em;color:#8b98a5;"> D</small></span></div>' +
+            '<div><span class="k">LONGEST</span><span class="n hot">' + (c.longestStreak != null ? c.longestStreak : '-') + '<small style="font-size:.5em;color:#8b98a5;"> D</small></span></div>' +
+            '</div>' +
+            '<div class="stat-updated">// COMMITS / ISSUES / PRS</div>';
+        }
+
+        var langEl = document.getElementById('stat-langs');
+        if (langEl) {
+          var maxPct = langs.length ? Math.max.apply(null, langs.map(function (l) { return l.pct; })) : 1;
+          langEl.innerHTML = langs.map(function (l) {
+            var color = LANG_COLORS[l.name] || '#8b98a5';
+            var w = Math.max(2, Math.round(l.pct / maxPct * 100));
+            return '<div class="lang-row" style="--dot:' + color + '">' +
+              '<div class="top"><span class="name">' + l.name + '</span><span class="pct">' + l.pct + '%</span></div>' +
+              '<div class="lang-bar"><i style="width:' + w + '%"></i></div>' +
+              '</div>';
+          }).join('') || '<div class="stat-loading">NO DATA</div>';
+        }
+      })
+      .catch(function () {
+        var msg = '<div class="stat-error">stats.json 尚未生成<br>' +
+          '首次由 GitHub Actions 自动生成（push 后约 1-2 分钟）<br>' +
+          '若长时间未生成，请检查仓库 Actions 运行记录</div>';
+        statOverview.innerHTML = msg;
+        var c1 = document.getElementById('stat-contribs'); if (c1) c1.innerHTML = msg;
+        var c2 = document.getElementById('stat-langs'); if (c2) c2.innerHTML = msg;
+      });
+  }
+
+  /* ================= 互动电路（仅主页 ABOUT 区） ================= */
+  var circuit = document.getElementById('circuit');
+  if (circuit) {
+    var traces = Array.prototype.slice.call(circuit.querySelectorAll('.circuit-trace'));
+    var pads = Array.prototype.slice.call(circuit.querySelectorAll('.circuit-pad'));
+    var vias = Array.prototype.slice.call(circuit.querySelectorAll('.circuit-via'));
+    var powered = false;
+
+    // 预采样走线坐标 + 记录长度（用于通电描线动画）
+    traces.forEach(function (p) {
+      var len = 0;
+      try { len = p.getTotalLength(); } catch (e) { /* 不可见时忽略 */ }
+      if (len > 0) p.style.setProperty('--len', len.toFixed(1));
+      var pts = [];
+      for (var d = 0; d <= len; d += 8) {
+        var pt = p.getPointAtLength(d);
+        pts.push([pt.x, pt.y]);
+      }
+      p._pts = pts;
+    });
+
+    // 滚动进入视野 → 通电
+    if ('IntersectionObserver' in window && !reduced) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            circuit.classList.add('powered');
+            powered = true;
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      io.observe(circuit);
+    } else {
+      circuit.classList.add('powered');
+      powered = true;
+    }
+
+    // 鼠标靠近走线 → 点亮发光
+    var mx = -9999, my = -9999, pending = false;
+    var RADIUS = 110; // SVG 用户坐标单位
+
+    function toSvgPoint(cx, cy) {
+      var pt = circuit.createSVGPoint();
+      pt.x = cx; pt.y = cy;
+      var m = circuit.getScreenCTM();
+      return m ? pt.matrixTransform(m.inverse()) : null;
+    }
+
+    function update() {
+      pending = false;
+      if (!powered) return;
+      var sp = toSvgPoint(mx, my);
+      if (!sp) return;
+      var px = sp.x, py = sp.y;
+
+      traces.forEach(function (path) {
+        var best = Infinity, pts = path._pts || [];
+        for (var i = 0; i < pts.length; i += 2) {
+          var dx = pts[i][0] - px, dy = pts[i][1] - py;
+          var d = dx * dx + dy * dy;
+          if (d < best) best = d;
+        }
+        var t = Math.max(0, 1 - Math.sqrt(best) / RADIUS);
+        path.style.opacity = (0.22 + 0.78 * t).toFixed(3);
+        path.style.strokeWidth = (1.5 + 1.4 * t).toFixed(2);
+      });
+
+      pads.forEach(function (pad) {
+        var dx = +pad.getAttribute('cx') - px, dy = +pad.getAttribute('cy') - py;
+        var t = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / RADIUS);
+        pad.style.opacity = (0.35 + 0.65 * t).toFixed(3);
+      });
+
+      vias.forEach(function (via) {
+        var dx = +via.getAttribute('cx') - px, dy = +via.getAttribute('cy') - py;
+        var t = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / RADIUS);
+        via.style.opacity = (0.25 + 0.75 * t).toFixed(3);
+      });
+    }
+
+    circuit.addEventListener('mousemove', function (e) {
+      mx = e.clientX; my = e.clientY;
+      if (!pending) { pending = true; requestAnimationFrame(update); }
+    });
+
+    circuit.addEventListener('mouseleave', function () {
+      mx = my = -9999;
+      traces.forEach(function (p) { p.style.opacity = ''; p.style.strokeWidth = ''; });
+      pads.forEach(function (p) { p.style.opacity = ''; });
+      vias.forEach(function (p) { p.style.opacity = ''; });
+    });
+  }
 })();

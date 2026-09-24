@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
+  <script src="gallery.js" defer></script>
 </head>
 <body>
   <canvas id="matrix"></canvas>
@@ -27,6 +28,7 @@
     <a class="logo" href="#home">CODEJ<span class="slash">://</span>40404</a>
     <nav class="nav-links">
       <a href="#home">HOME</a>
+      <a href="#about">ABOUT</a>
       <a href="#repos">REPOS</a>
       <a href="#stats">STATS</a>
       <a href="#blog">BLOG</a>
@@ -57,6 +59,99 @@
         <div class="hud-item"><span class="k">STARS</span><span class="v yl">9</span></div>
         <div class="hud-item"><span class="k">MAIN_LANG</span><span class="v pk">C++</span></div>
         <div class="hud-item"><span class="k">MODE</span><span class="v">HARDCORE</span></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+      <h2 class="sec-title"><span class="mark">//</span> WHOAMI</h2>
+      <p class="sec-sub">&gt;&gt; 我的简介 // PERSONAL PROFILE</p>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>我是 <em>CodeJ-40404</em>，一个热爱<em class="pk">计算机</em>与<em class="pk">开源</em>的开发者。</p>
+          <p>我相信代码应该自由地流动 —— 被阅读、被修改、被分享。开源不是口号，而是把好奇心变成所有人都能用的工具。</p>
+          <p>目前最重要的项目是 <a href="https://github.com/CodeJ-40404/Chemical-World" target="_blank" rel="noopener noreferrer"><em>Chemical-World</em></a>
+            —— 一个包含化学、工业与生存要素的硬核游戏：从一条熔炉产线开始，用化学反应堆出一整座化工帝国。</p>
+          <div class="about-chips">
+            <span class="chip">C++</span>
+            <span class="chip">OPEN_SOURCE</span>
+            <span class="chip">GAME_DEV</span>
+            <span class="chip">FTXUI</span>
+          </div>
+        </div>
+        <div class="circuit-wrap">
+          <svg id="circuit" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="interactive circuit board">
+            <!-- 四角装饰 -->
+            <path class="circuit-corner" d="M10,40 V10 H40"/>
+            <path class="circuit-corner" d="M460,10 H490 V40"/>
+            <path class="circuit-corner" d="M490,460 V490 H460"/>
+            <path class="circuit-corner" d="M40,490 H10 V460"/>
+
+            <!-- 走线 -->
+            <path class="circuit-trace" style="--delay:0s" d="M200,220 H150 L120,190 H70"/>
+            <path class="circuit-trace" style="--delay:.15s" d="M200,250 H130"/>
+            <path class="circuit-trace" style="--delay:.3s" d="M200,280 H160 L110,330 V380"/>
+            <path class="circuit-trace" style="--delay:.45s" d="M300,220 H350 L390,180 V120"/>
+            <path class="circuit-trace" style="--delay:.6s" d="M300,250 H380"/>
+            <path class="circuit-trace" style="--delay:.75s" d="M300,280 H340 L380,320 V390"/>
+            <path class="circuit-trace" style="--delay:.9s" d="M220,200 V150 L190,120 V70"/>
+            <path class="circuit-trace" style="--delay:1.05s" d="M250,200 V110"/>
+            <path class="circuit-trace" style="--delay:1.2s" d="M280,200 V140 L320,100 V50"/>
+            <path class="circuit-trace" style="--delay:1.35s" d="M220,300 V350 L180,390 V440"/>
+            <path class="circuit-trace" style="--delay:1.5s" d="M250,300 V400"/>
+            <path class="circuit-trace" style="--delay:1.65s" d="M280,300 V360 L330,410 V455"/>
+
+            <!-- 焊盘 -->
+            <circle class="circuit-pad" cx="70" cy="190" r="5"/>
+            <circle class="circuit-pad" cx="130" cy="250" r="5"/>
+            <circle class="circuit-pad" cx="110" cy="380" r="5"/>
+            <circle class="circuit-pad" cx="390" cy="120" r="5"/>
+            <circle class="circuit-pad" cx="380" cy="250" r="5"/>
+            <circle class="circuit-pad" cx="380" cy="390" r="5"/>
+            <circle class="circuit-pad" cx="190" cy="70" r="5"/>
+            <circle class="circuit-pad" cx="250" cy="110" r="5"/>
+            <circle class="circuit-pad" cx="320" cy="50" r="5"/>
+            <circle class="circuit-pad" cx="180" cy="440" r="5"/>
+            <circle class="circuit-pad" cx="250" cy="400" r="5"/>
+            <circle class="circuit-pad" cx="330" cy="455" r="5"/>
+
+            <!-- 过孔 -->
+            <circle class="circuit-via" cx="120" cy="190" r="2.5"/>
+            <circle class="circuit-via" cx="160" cy="280" r="2.5"/>
+            <circle class="circuit-via" cx="350" cy="220" r="2.5"/>
+            <circle class="circuit-via" cx="340" cy="280" r="2.5"/>
+            <circle class="circuit-via" cx="190" cy="120" r="2.5"/>
+            <circle class="circuit-via" cx="320" cy="140" r="2.5"/>
+            <circle class="circuit-via" cx="180" cy="350" r="2.5"/>
+            <circle class="circuit-via" cx="330" cy="360" r="2.5"/>
+
+            <!-- 主芯片 -->
+            <g class="circuit-chip">
+              <rect x="200" y="200" width="100" height="100" rx="6"/>
+              <text x="250" y="242" class="chip-big">CJ</text>
+              <text x="250" y="264" class="chip-small">40404</text>
+              <text x="250" y="286" class="chip-tiny">CORE v1.0</text>
+            </g>
+
+            <!-- 信号脉冲 -->
+            <circle class="circuit-pulse" r="3">
+              <animateMotion dur="3.2s" repeatCount="indefinite" path="M200,250 H130"/>
+            </circle>
+            <circle class="circuit-pulse" r="3">
+              <animateMotion dur="4.1s" begin="0.6s" repeatCount="indefinite" path="M300,220 H350 L390,180 V120"/>
+            </circle>
+            <circle class="circuit-pulse" r="3">
+              <animateMotion dur="2.7s" begin="1.2s" repeatCount="indefinite" path="M250,200 V110"/>
+            </circle>
+            <circle class="circuit-pulse" r="3">
+              <animateMotion dur="4.6s" begin="0.3s" repeatCount="indefinite" path="M220,300 V350 L180,390 V440"/>
+            </circle>
+            <circle class="circuit-pulse" r="3">
+              <animateMotion dur="5s" begin="1.8s" repeatCount="indefinite" path="M280,300 V360 L330,410 V455"/>
+            </circle>
+          </svg>
+          <div class="circuit-hint">// HOVER THE CIRCUIT</div>
+        </div>
       </div>
     </section>
 
@@ -117,19 +212,19 @@
     <!-- STATS -->
     <section id="stats">
       <h2 class="sec-title"><span class="mark">//</span> GITHUB_STATS</h2>
-      <p class="sec-sub">&gt;&gt; 实时数据流 // LIVE DATA FEED</p>
+      <p class="sec-sub">&gt;&gt; 同源数据流 // LIVE DATA FEED（由 GitHub Actions 每日自动生成）</p>
       <div class="stats-grid">
         <div class="stat-frame">
-          <span class="frame-label">STATS_CARD</span>
-          <img loading="lazy" src="https://github-readme-stats.vercel.app/api?username=CodeJ-40404&amp;show_icons=true&amp;hide_border=true&amp;bg_color=00000000&amp;title_color=00f0ff&amp;text_color=c9d1d9&amp;icon_color=ff2a6d" alt="GitHub Stats">
+          <span class="frame-label">OVERVIEW</span>
+          <div class="stat-body" id="stat-overview"><div class="stat-loading">LOADING...</div></div>
         </div>
         <div class="stat-frame">
-          <span class="frame-label">STREAK</span>
-          <img loading="lazy" src="https://streak-stats.deno.dev?user=CodeJ-40404&amp;hide_border=true&amp;background=00000000&amp;stroke=00f0ff&amp;ring=ff2a6d&amp;fire=ffe600&amp;currStreakLabel=00f0ff&amp;dates=5c6a7e" alt="GitHub Streak">
+          <span class="frame-label">CONTRIBUTIONS</span>
+          <div class="stat-body" id="stat-contribs"><div class="stat-loading">LOADING...</div></div>
         </div>
         <div class="stat-frame">
           <span class="frame-label">TOP_LANGS</span>
-          <img loading="lazy" src="https://github-readme-stats.vercel.app/api/top-langs/?username=CodeJ-40404&amp;layout=compact&amp;hide_border=true&amp;bg_color=00000000&amp;title_color=00f0ff&amp;text_color=c9d1d9" alt="Top Languages">
+          <div class="stat-body" id="stat-langs"><div class="stat-loading">LOADING...</div></div>
         </div>
       </div>
     </section>
@@ -158,6 +253,7 @@
 
   <footer>
     <span class="hl">© 2026 CodeJ-40404</span> // BUILT WITH <span class="flicker-word">NEON</span> &amp; CODE // ALL SYSTEMS NOMINAL
+    <button class="boring-btn" type="button">感到无聊？戳我试试 <i class="fas fa-wand-magic-sparkles"></i></button>
   </footer>
 </body>
 </html>

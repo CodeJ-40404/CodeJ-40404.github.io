@@ -1,0 +1,20 @@
+{
+  "updated_at": "2026-09-24T00:00:00.000Z",
+  "user": {
+    "login": "CodeJ-40404",
+    "repos": 5,
+    "followers": 3,
+    "stars": 9
+  },
+  "contributions": {
+    "total": 428,
+    "currentStreak": 6,
+    "longestStreak": 23
+  },
+  "langs": [
+    { "name": "C++", "pct": 82.4 },
+    { "name": "HTML", "pct": 9.1 },
+    { "name": "Python", "pct": 5.2 },
+    { "name": "Markdown", "pct": 3.3 }
+  ]
+}
