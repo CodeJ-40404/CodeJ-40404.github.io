@@ -182,6 +182,47 @@ body::-webkit-scrollbar-thumb{background:#1a2622;border-radius:5px}
 .j-num{color:#ffb37a}
 .j-bool,.j-null{color:#c792ea}
 
+/* ---- 手动输入面板（移动端可替代文件导入） ---- */
+#input-overlay{position:fixed;inset:0;z-index:85;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(6,9,8,.82);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#input-overlay.on{display:flex}
+.ip-panel{width:min(680px,94vw);max-height:92vh;display:flex;flex-direction:column;
+  background:rgba(9,13,12,.96);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 26px rgba(142,240,182,.06);
+  animation:ipIn .25s ease}
+@keyframes ipIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.ip-head{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--line)}
+.ip-title{font:12.5px Consolas,ui-monospace,monospace;color:var(--accent);letter-spacing:.05em;
+  text-shadow:0 0 8px rgba(142,240,182,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ip-close{margin-left:auto;background:none;border:0;color:var(--mute);font-size:14px;line-height:1;
+  cursor:pointer;padding:4px 9px;border-radius:6px;transition:.15s;flex:none}
+#ip-close:hover{color:var(--accent);background:rgba(142,240,182,.08)}
+.ip-hint{padding:11px 15px 0;font-size:12px;line-height:1.8;color:var(--mute);
+  font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+.ip-hint b{color:#86b79a;font-weight:600}
+#ip-text{flex:1;min-height:36vh;margin:12px 15px 4px;padding:12px 14px;resize:vertical;
+  background:#0b1210;border:1px solid var(--line);border-radius:9px;outline:none;
+  color:#b4d2bf;caret-color:var(--accent);
+  font:13.5px/1.75 Consolas,ui-monospace,"Microsoft YaHei",monospace;
+  white-space:pre-wrap;word-break:break-word;tab-size:2;transition:border-color .15s,box-shadow .15s}
+#ip-text::placeholder{color:#41504a}
+#ip-text:focus{border-color:var(--accent-dim);box-shadow:0 0 0 1px rgba(142,240,182,.18),0 0 18px rgba(142,240,182,.07)}
+.ip-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 15px 0}
+.ip-fmt{display:flex;align-items:center;gap:7px;font:11.5px Consolas,ui-monospace,monospace;color:var(--mute)}
+.ip-fmt select{background:#0d1412;color:var(--txt);border:1px solid var(--line);border-radius:6px;
+  font:11.5px Consolas,ui-monospace,monospace;padding:5px 7px}
+.ip-status{font:11px Consolas,ui-monospace,monospace;color:var(--mute);letter-spacing:.03em}
+.ip-status.err{color:#ff8b7a}
+.ip-status.ok{color:var(--accent)}
+.ip-actions{display:flex;justify-content:flex-end;gap:9px;padding:12px 15px 14px}
+.ip-actions button{font:12.5px Consolas,ui-monospace,monospace;letter-spacing:.04em;
+  color:var(--txt);background:rgba(9,13,12,.85);border:1px solid var(--line);border-radius:8px;
+  padding:9px 16px;cursor:pointer;transition:.15s}
+.ip-actions button:hover{color:var(--accent);border-color:var(--accent)}
+.ip-actions button.primary{color:#07110b;background:var(--accent);border-color:var(--accent);font-weight:700}
+.ip-actions button.primary:hover{box-shadow:0 0 18px rgba(142,240,182,.4);color:#07110b}
+
 @media (max-width:900px){
   #doc{padding:30px 24px}
   #ctrl{max-width:60vw}
@@ -190,6 +231,12 @@ body::-webkit-scrollbar-thumb{background:#1a2622;border-radius:5px}
   #json-panel{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:42vh}
   #json-panel.win-collapsed{height:auto}
   #json-panel.tucked{top:auto}
+  /* 手动输入面板：近全屏、大输入区、16px 防 iOS 聚焦缩放 */
+  #input-overlay{padding:10px}
+  .ip-panel{width:100%;max-height:94vh}
+  .ip-hint{font-size:11.5px;line-height:1.7}
+  #ip-text{min-height:44vh;font-size:16px;padding:11px 12px}
+  .ip-actions button{flex:1;padding:11px 10px}
 }
 </style>
 </head>
@@ -210,6 +257,7 @@ body::-webkit-scrollbar-thumb{background:#1a2622;border-radius:5px}
   <a href="index.html" id="btn-home" title="返回主页">← 主页</a>
   <button id="btn-import">导入 .md / .txt</button>
   <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain">
+  <button id="btn-paste" title="直接粘贴或输入文本（适合手机端）">手动输入</button>
   <button id="btn-pause">暂停</button>
   <button id="btn-crawl">重新爬取</button>
   <span class="spd"><label>速度</label><input type="range" id="spd-range" min="0.5" max="3" step="0.1" value="1"><input type="number" id="spd-num" min="0.5" max="3" step="0.1" value="1.0"></span>
@@ -257,6 +305,35 @@ body::-webkit-scrollbar-thumb{background:#1a2622;border-radius:5px}
 </div>
 
 <div id="caption">SCUTIGERA COLEOPTRATA · 几何蚰蜒 — 漫步时靠近会躲开 · 导入 .md/.txt 她将开始爬取</div>
+<div id="input-overlay">
+  <div class="ip-panel" role="dialog" aria-modal="true" aria-labelledby="ip-title">
+    <div class="ip-head">
+      <span class="ip-title" id="ip-title">&gt;_ 手动输入文档 // MANUAL INPUT</span>
+      <button id="ip-close" type="button" title="关闭 (ESC)">✕</button>
+    </div>
+    <div class="ip-hint">
+      直接粘贴或输入 <b>Markdown</b> / 纯文本内容，<b>换行与空格都会原样保留</b>，提交后将重建文档并开始爬取。<br>
+      输入内容会自动保存在本浏览器（localStorage），意外关闭也不丢失。快捷键：<b>Ctrl / ⌘ + Enter</b> 提交。
+    </div>
+    <textarea id="ip-text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
+      wrap="soft" placeholder="# 在这里输入或粘贴文档…&#10;&#10;支持 Markdown：# 标题、**加粗**、- 列表、`代码`、表格、引用块……&#10;什么都不写也没关系，任意纯文本同样可以爬取。"></textarea>
+    <div class="ip-meta">
+      <label class="ip-fmt">格式
+        <select id="ip-fmt">
+          <option value="auto">自动识别</option>
+          <option value="md">Markdown</option>
+          <option value="txt">纯文本</option>
+        </select>
+      </label>
+      <span id="ip-status" class="ip-status">0 字 · 草稿自动保存在本地</span>
+    </div>
+    <div class="ip-actions">
+      <button id="ip-clear" type="button">清空草稿</button>
+      <button id="ip-submit" type="button" class="primary">提交并爬取 →</button>
+    </div>
+  </div>
+</div>
+
 <div id="drop-overlay"><div class="box">松手</div></div>
 <div id="scanlines"></div>
 
@@ -645,6 +722,71 @@ function loadDocument(text,name){
 }
 $('#btn-import').onclick=()=>$('#file-input').click();
 $('#file-input').onchange=e=>{importFile(e.target.files[0]);e.target.value='';};
+
+/* ================= 手动文本输入（移动端替代文件导入） ================= */
+const ipOverlay=$('#input-overlay'),ipText=$('#ip-text'),ipFmt=$('#ip-fmt'),ipStatus=$('#ip-status');
+const K_TEXT='scutigera.draft.text',K_FMT='scutigera.draft.fmt';
+let ipSaveTimer=null;
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function ipCount(){return ipText.value.replace(/\s/g,'').length;}
+function ipRefresh(savedMsg){
+  const n=ipCount();
+  ipStatus.classList.remove('err','ok');
+  ipStatus.textContent=n+' 字 · '+(savedMsg||'草稿自动保存在本地');
+}
+function openInput(){
+  const draft=lsGet(K_TEXT);
+  ipText.value=(draft!==null)?draft:'';   // 无草稿时清空，避免残留上次已提交的内容
+  if(draft&&draft.length)term('event','恢复本地草稿 · '+draft.length+' 字符');
+  const f=lsGet(K_FMT);if(f)ipFmt.value=f;
+  ipOverlay.classList.add('on');
+  ipRefresh(draft&&draft.length?'已恢复上次的本地草稿':'草稿自动保存在本地');
+  ipText.focus();                        // 点击链内直接聚焦，iOS 可唤起软键盘
+}
+function closeInput(){
+  ipOverlay.classList.remove('on');
+  ipText.blur();                         // 收起移动端软键盘
+}
+$('#btn-paste').onclick=openInput;
+$('#ip-close').onclick=closeInput;
+ipOverlay.addEventListener('click',e=>{if(e.target===ipOverlay)closeInput();});
+addEventListener('keydown',e=>{
+  if(!ipOverlay.classList.contains('on'))return;
+  if(e.key==='Escape'){closeInput();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();submitInput();}
+});
+ipText.addEventListener('input',()=>{
+  ipRefresh();
+  clearTimeout(ipSaveTimer);
+  ipSaveTimer=setTimeout(()=>{
+    if(lsSet(K_TEXT,ipText.value)){ipRefresh('草稿已保存 '+new Date().toTimeString().slice(0,8));}
+    else ipStatus.textContent=ipCount()+' 字 · 本地存储不可用（隐私模式？）';
+  },400);
+});
+ipFmt.addEventListener('change',()=>lsSet(K_FMT,ipFmt.value));
+function submitInput(){
+  const text=ipText.value;
+  if(!text.trim()){
+    ipStatus.classList.add('err');
+    ipStatus.textContent='内容为空 · 请先输入或粘贴文本再提交';
+    ipText.focus();
+    return;
+  }
+  const fmt=ipFmt.value;
+  const name=fmt==='md'?'手动输入.md':fmt==='txt'?'手动输入.txt':'手动输入';
+  lsDel(K_TEXT);                        // 提交成功后清草稿（防丢任务已交给爬取系统）
+  term('event','手动输入提交 · '+text.length+' 字符 · 格式 '+(fmt==='auto'?'自动识别':fmt.toUpperCase()));
+  loadDocument(text,name);
+  ipText.value='';                      // 清空输入区，防止下次打开残留
+  closeInput();
+}
+$('#ip-submit').onclick=submitInput;
+$('#ip-clear').onclick=()=>{
+  ipText.value='';lsDel(K_TEXT);ipRefresh('草稿已清空');ipText.focus();
+  term('event','手动输入草稿已清空');
+};
 $('#btn-crawl').onclick=()=>{
   if(!st.blocks.length){term('event','尚未导入文档');return;}
   prepareCrawl();
