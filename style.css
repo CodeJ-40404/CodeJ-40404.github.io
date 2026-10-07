@@ -1050,9 +1050,39 @@ footer .flicker-word { color: var(--a2); animation: word-flicker 5s infinite; }
 .circuit-hint { font-size: 0.6rem; color: var(--dim); letter-spacing: 2px; }
 
 /* ---------- 无聊彩蛋画廊 ---------- */
+.footer-fun {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin-top: 0.7rem;
+}
+
+.bored-link {
+  font-family: var(--font);
+  font-size: 0.74rem;
+  letter-spacing: 2px;
+  color: var(--a1);
+  text-shadow: var(--glow-a1);
+  text-decoration: none;
+  border: 1px solid var(--line2);
+  border-radius: var(--btn-radius);
+  padding: 0.32rem 0.9rem;
+  animation: blink 2.6s ease-in-out infinite;
+  transition: color 0.2s, text-shadow 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.bored-link:hover {
+  color: var(--a2);
+  text-shadow: var(--glow-a2);
+  box-shadow: 0 0 14px var(--line);
+  transform: translateY(-2px);
+  animation: none;
+}
+
 .boring-btn {
   display: block;
-  margin: 0.7rem auto 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -1062,14 +1092,12 @@ footer .flicker-word { color: var(--a2); animation: word-flicker 5s infinite; }
   color: var(--a3);
   text-shadow: var(--glow-a3);
   transition: color 0.2s, text-shadow 0.2s, transform 0.2s;
-  animation: blink 2.6s ease-in-out infinite;
 }
 
 .boring-btn:hover {
   color: var(--a1);
   text-shadow: var(--glow-a1);
   transform: translateY(-2px);
-  animation: none;
 }
 
 #gallery-modal {
