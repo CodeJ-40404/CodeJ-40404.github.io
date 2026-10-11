@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="cyber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于我，你知道多少？ // QUIZ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('codej-theme') || 'cyber';
+      document.documentElement.setAttribute('data-theme', t);
+    }catch(e){}
+  })();
+</script>
+<style>
+  /* ============ 问卷样式 ============ */
+  .quiz-topbar{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap; }
+  .quiz-wrap{ max-width: 820px; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+  .quiz-back{
+    display: inline-flex; align-items: center; gap: .5rem;
+    color: var(--a1); text-decoration: none; font-size: .8rem;
+    letter-spacing: 2px; opacity: .85; transition: opacity .2s;
+  }
+  .quiz-back:hover{ opacity: 1; text-shadow: var(--glow-a1); }
+  .quiz-header{
+    border: 1px solid var(--line2); border-radius: 14px; padding: 1.8rem 2rem;
+    background: var(--panel); margin-bottom: 1.8rem;
+    box-shadow: var(--card-shadow), 0 0 30px var(--line);
+  }
+  .quiz-title{ font-size: 1.6rem; margin: 0 0 .4rem; color: var(--a1); text-shadow: var(--glow-a1); letter-spacing: 2px; }
+  .quiz-sub{ color: var(--dim); font-size: .85rem; line-height: 1.8; }
+  .quiz-sub b{ color: var(--a2); }
+  .diff-row{ display: flex; gap: .8rem; margin-top: 1.4rem; flex-wrap: wrap; }
+  .diff-btn{
+    flex: 1; min-width: 140px; padding: .85rem 1rem; border: 1px solid var(--line2);
+    background: transparent; color: var(--text); font-family: var(--font); font-size: .9rem;
+    border-radius: 10px; cursor: pointer; letter-spacing: 1px; transition: .2s;
+  }
+  .diff-btn:hover{ border-color: var(--a1); color: var(--a1); box-shadow: 0 0 16px var(--line2); }
+  .diff-btn.active{ background: var(--a1); color: #000; border-color: var(--a1); font-weight: 700;
+    box-shadow: 0 0 20px var(--glow-a1); }
+  .diff-btn.hard.active{ background: var(--a2); color: #fff; border-color: var(--a2); box-shadow: 0 0 20px var(--glow-a2); }
+  .diff-hint{ font-size: .72rem; color: var(--dim); margin-top: .3rem; opacity: .8; }
+
+  /* 题卡 */
+  .card{
+    border: 1px solid var(--line2); border-radius: 14px; padding: 1.6rem 1.8rem;
+    background: var(--panel); margin-bottom: 1.4rem;
+    box-shadow: var(--card-shadow); position: relative;
+  }
+  .q-head{ display: flex; align-items: baseline; gap: .8rem; margin-bottom: 1rem; }
+  .q-num{ color: var(--a2); font-weight: 700; letter-spacing: 1px; font-size: .85rem; }
+  .q-num .total{ color: var(--dim); font-weight: 400; }
+  .q-tag{ font-size: .68rem; padding: .15rem .5rem; border: 1px solid var(--line2); border-radius: 5px; color: var(--dim); }
+  .q-tag.multi{ color: var(--a3); border-color: var(--a3); }
+  .q-text{ font-size: 1.05rem; line-height: 1.75; margin: 0 0 1.2rem; color: var(--text); }
+  .opts{ display: flex; flex-direction: column; gap: .6rem; }
+  .opt{
+    display: flex; align-items: center; gap: .8rem; padding: .8rem 1rem;
+    border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
+    transition: .18s; background: transparent; font-size: .92rem;
+  }
+  .opt:hover{ border-color: var(--a1); background: var(--line); }
+  .opt input{ accent-color: var(--a1); width: 17px; height: 17px; flex-shrink: 0; }
+  .opt .letter{ font-weight: 700; color: var(--a1); min-width: 1.2em; }
+  .opt.picked{ border-color: var(--a1); background: var(--line); }
+  .opt.correct{ border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
+  .opt.correct .letter{ color: var(--green); }
+  .opt.wrong{ border-color: var(--a2); background: color-mix(in srgb, var(--a2) 10%, transparent); }
+  .opt.wrong .letter{ color: var(--a2); }
+  .opt.reveal{ border-color: var(--green); border-style: dashed; }
+
+  .q-input{
+    width: 100%; padding: .9rem 1rem; border: 1px solid var(--line2); border-radius: 9px;
+    background: transparent; color: var(--text); font-family: var(--font); font-size: .95rem;
+    outline: none; box-sizing: border-box;
+  }
+  .q-input:focus{ border-color: var(--a1); box-shadow: 0 0 14px var(--line2); }
+  textarea.q-input{ min-height: 110px; resize: vertical; line-height: 1.7; }
+
+  .action-row{ display: flex; gap: .8rem; margin-top: 1.4rem; align-items: center; flex-wrap: wrap; }
+  .btn{
+    padding: .7rem 1.4rem; border: 1px solid var(--a1); background: var(--a1);
+    color: #000; border-radius: 9px; cursor: pointer; font-family: var(--font);
+    font-size: .9rem; font-weight: 700; letter-spacing: 1px; transition: .2s;
+  }
+  .btn:hover{ box-shadow: 0 0 18px var(--glow-a1); transform: translateY(-2px); }
+  .btn:disabled{ opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn.ghost{ background: transparent; color: var(--a1); }
+  .btn.ghost:hover{ background: var(--line); }
+
+  .feedback{
+    margin-top: 1.2rem; padding: 1rem 1.2rem; border-radius: 10px;
+    border: 1px solid var(--line); font-size: .9rem; line-height: 1.7;
+    animation: fkIn .3s ease;
+  }
+  .feedback.ok{ border-color: var(--green); background: color-mix(in srgb, var(--green) 10%, transparent); }
+  .feedback.half{ border-color: var(--a3); background: color-mix(in srgb, var(--a3) 10%, transparent); }
+  .feedback.ng{ border-color: var(--a2); background: color-mix(in srgb, var(--a2) 10%, transparent); }
+  .feedback .tag{ font-weight: 700; letter-spacing: 1px; }
+  .feedback .tag.ok{ color: var(--green); }
+  .feedback .tag.half{ color: var(--a3); }
+  .feedback .tag.ng{ color: var(--a2); }
+  .feedback .ans{ margin-top: .4rem; color: var(--dim); font-size: .85rem; }
+  .feedback .ans b{ color: var(--a1); }
+  @keyframes fkIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+
+  /* 进度条 */
+  .progress{ height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 1.4rem; }
+  .progress > div{ height: 100%; background: linear-gradient(90deg, var(--a1), var(--a2)); width: 0; transition: width .4s; }
+
+  /* 总分卡 */
+  .final{
+    text-align: center; padding: 2.5rem 2rem;
+    border: 1px solid var(--line2); border-radius: 14px;
+    background: var(--panel);
+    box-shadow: var(--card-shadow), 0 0 40px var(--line);
+  }
+  .final .score{ font-size: 4rem; font-weight: 900; color: var(--a1); text-shadow: var(--glow-a1); line-height: 1; }
+  .final .score small{ font-size: 1.4rem; color: var(--dim); font-weight: 400; }
+  .final .level{ font-size: 1.3rem; margin: .8rem 0; color: var(--a2); text-shadow: var(--glow-a2); }
+  .final .desc{ color: var(--dim); line-height: 1.8; font-size: .9rem; max-width: 520px; margin: 0 auto 1.4rem; }
+  .breakdown{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0 1.6rem; }
+  .breakdown .b-item{ padding: .8rem; border: 1px solid var(--line); border-radius: 9px; font-size: .85rem; }
+  .breakdown .b-item .k{ color: var(--dim); font-size: .75rem; letter-spacing: 1px; }
+  .breakdown .b-item .v{ font-size: 1.2rem; color: var(--a1); font-weight: 700; margin-top: .2rem; }
+
+  @media (max-width: 600px){
+    .quiz-wrap{ padding: 1rem .7rem 3rem; }
+    .quiz-header{ padding: 1.2rem; }
+    .quiz-title{ font-size: 1.2rem; }
+    .card{ padding: 1.2rem 1rem; }
+    .breakdown{ grid-template-columns: 1fr; }
+    .final .score{ font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="quiz-wrap">
+  <div class="quiz-topbar">
+    <a class="quiz-back" href="index.html">← 返回主页 // BACK</a>
+    <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换主题"></button>
+  </div>
+
+  <header class="quiz-header">
+    <h1 class="quiz-title">// 关于我，你知道多少？</h1>
+    <p class="quiz-sub">
+      一共 <b>24</b> 题，分两个难度。每题答完即时反馈，<b>放水版</b>10题 + <b>地狱版</b>14题（含填空/简答）。<br>
+      计分：多选全对 1 分，部分对 0.5 分，有错选 0 分；简答/填空合理即 1 分。<br>
+      15 分 = 很了解这只猴子 · 20 分 = 很熟悉 · 25 分 = 你看答案了吧 <b>(doge)</b>
+    </p>
+    <div class="diff-row">
+      <button class="diff-btn active" data-diff="all">🏆 完整挑战 (25题)</button>
+      <button class="diff-btn" data-diff="easy">🥤 仅放水版 (10题)</button>
+      <button class="diff-btn hard" data-diff="hard">🔥 仅地狱版 (15题)</button>
+    </div>
+    <div class="diff-hint" id="diff-hint">当前：完整挑战 — 放水版(10) → 地狱版(15)，满分 25 分</div>
+  </header>
+
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+/* ============ 题目数据 ============ */
+const QUIZ = {
+  easy: [
+    { t:'我是男的女的', type:'single', opts:['男','选A，我送一分'], ans:['A'] },
+    { t:'我最喜欢以下哪个东西', type:'single', opts:['唱粤语歌','画漫画','旅游','计算机'], ans:['D'] },
+    { t:'我最讨厌以下哪个东西', type:'single', opts:['CSS','HTML','Java','C++'], ans:['C'] },
+    { t:'我的身高', type:'single', opts:['170-175','175-180','180-185','185+'], ans:['C'] },
+    { t:'我的网名是以下哪几个', type:'multi', opts:['CodeJ-40404（也作codej_40404）','Jason Law（也作Jason Lau）','NotANoobro（也作Notanoobro）','6109（也作6_1_0_9）','Lmeow（也作lmeow）','wtfff__lol（也作WTFFF__lol）'], ans:['A','B','D'] },
+    { t:'我最擅长的学科是', type:'single', opts:['数学','英语','语文','生物','地理','物理','化学','政治','历史','体育'], ans:['A'] },
+    { t:'我什么时候有的现在使用的那台电脑', type:'single', opts:['2022','2023','2024','2025','2026'], ans:['A'] },
+    { t:'我周末出门吗', type:'single', opts:['几乎从来不出','仅取快递/买东西','偶尔和父母/同学出门','经常要和父母/同学出门','几乎必定出门'], ans:['B'] },
+    { t:'我是什么性格', type:'single', opts:['非常开朗','非常腼腆','熟悉了就开朗了','冷漠'], ans:['C'] },
+    { t:'我的外号是哪个', type:'single', opts:['猪大爷','板牙','大馒头','牢杰'], ans:['D'] }
+  ],
+  hard: [
+    { t:'送分题，这题题号是', type:'single', opts:['1','2','3','4','别选我'], ans:['A'] },
+    { t:'我的嘴脏程度', type:'single', opts:['100%','50%','67%','13%'], ans:['B'] },
+    { t:'我的数学水平如何', type:'multi', opts:['考过120','很差，经常不及格','能做出压轴题','大白卷','会因式分解','会相似三角形','能做出来竞赛题','可以做一些思维题'], ans:['A','C','E','H'] },
+    { t:'我最喜欢吃以下哪个菜系', type:'single', opts:['江西菜','湖南菜','东北菜','广东菜','西餐','东南亚菜系','厕所菜系'], ans:['A'] },
+    { t:'我祖籍在哪里（或者我3岁前在哪里生活）', type:'single', opts:['湖南湘潭','江西九江','广东佛山','江西南昌','广东东莞','辽宁沈阳','日本东京'], ans:['B'] },
+    { t:'我多少岁（给熟人送分）', type:'single', opts:['13','14','12','18'], ans:['A'] },
+    { t:'选出真的选项', type:'multi', opts:['我擅长小提琴','我从未骨折过','我偏瘦','我家的车是大众','我吃不了辣','我会说家乡话'], ans:['C','D'] },
+    { t:'我的微信情况', type:'multi', opts:['经常发67','经常和同学在微信聊天','和同学在微信里聊天的少','几乎不发朋友圈','朋友圈比较热闹','有5-10个朋友','有10-15个朋友'], ans:['A','C','E','G'] },
+    { t:'我用的什么操作系统', type:'single', opts:['Linux Ubuntu','鸿蒙','macOS','Windows'], ans:['D'] },
+    { t:'我一般（常）用什么IDE', type:'multi', opts:['Visual Studio','Trae','Pycharm','IDEA IntelliJ','CLion','Vim','Emacs','VS Code','Dev-C++'], ans:['A','B'] },
+    { t:'我帅不帅', type:'multi', opts:['很帅','非常帅','特别帅','极度帅','吴彦祖','不帅','67'], ans:['A','B','C','D','E'] },
+    { t:'我有什么平台的账号', type:'multi', opts:['微信','抖音','QQ','GitHub','GitLab','Stack Overflow','Steam','X','Telegram','Instagram','YouTube','Reddit','CSDN','企业微信'], ans:['A','B','C','D','M'] },
+    { t:'我讨厌什么', type:'multi', opts:['蜘蛛蜈蚣蚰蜒毛毛虫爬虫蠕虫','吃辣的东西','考砸','大家都话痨','大家都潜水','冬天','夏天'], ans:['A','C','E'] },
+    { t:'（防满分）填空题：我得知成绩时一般是什么反应', type:'fill', ans:['手抵','嘴边','瞳孔放大','震惊','啊','我靠'], ansText:'手抵在嘴边然后瞳孔放大非常震惊，然后统一的"啊？"和"我靠"（无论好坏）' },
+    { t:'开放题：我整个人对于不同领域的兴趣都是什么样的', type:'short', ans:'对于计算机、科学最感兴趣；文科兴趣一般；英语擅长但本身不感兴趣；对国外文化比较感兴趣但有限；体育兴趣一般，最擅长400m。（不为空即给分）' }
+  ]
+};
+
+/* ============ 状态 ============ */
+let state = { mode:'all', idx:0, score:0, answers:[] };
+
+const $ = s => document.querySelector(s);
+const area = $('#quiz-area');
+
+function buildList(mode){
+  if(mode==='easy') return QUIZ.easy.map(q=>({...q, part:'放水版'}));
+  if(mode==='hard') return QUIZ.hard.map(q=>({...q, part:'地狱版'}));
+  return [
+    ...QUIZ.easy.map(q=>({...q, part:'放水版'})),
+    ...QUIZ.hard.map(q=>({...q, part:'地狱版'}))
+  ];
+}
+
+function setMode(m){
+  state = { mode:m, idx:0, score:0, answers:[] };
+  document.querySelectorAll('.diff-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.diff===m);
+  });
+  const hint = m==='all' ? '当前：完整挑战 — 满分 25 分'
+            : m==='easy' ? '当前：仅放水版 — 看看你是不是路人'
+            : '当前：仅地狱版 — 不定项选择，小心有坑';
+  $('#diff-hint').textContent = hint;
+  render();
+}
+
+document.querySelectorAll('.diff-btn').forEach(b=>b.onclick=()=>setMode(b.dataset.diff));
+
+/* ============ 评分 ============ */
+function grade(q, picked, text){
+  if(q.type==='short') return text.trim() ? 1 : 0;
+  if(q.type==='fill'){
+    if(!text.trim()) return 0;
+    const lower = text.toLowerCase();
+    let hits = q.ans.filter(k=>lower.includes(k.toLowerCase())).length;
+    return hits >= Math.ceil(q.ans.length/2) ? 1 : 0;
+  }
+  const ans = new Set(q.ans), pick = new Set(picked);
+  let correct=0, wrong=0;
+  pick.forEach(p=> ans.has(p)?correct++:wrong++);
+  const missing = ans.size - correct;
+  if(wrong>0) return 0;
+  if(missing===0) return 1;
+  if(correct>0) return 0.5;
+  return 0;
+}
+
+function optLabel(i){ return String.fromCharCode(65+i); }
+
+/* ============ 渲染 ============ */
+function render(){
+  const list = buildList(state.mode);
+  const total = list.length;
+  if(state.idx >= total){ renderFinal(); return; }
+  const q = list[state.idx];
+  const progress = (state.idx/total)*100;
+  let typeTag = q.type==='multi' ? '多选' : q.type==='fill' ? '填空' : q.type==='short' ? '简答' : '单选';
+  let typeCls = q.type==='multi' ? 'multi' : '';
+  let qLabel;
+  if(state.mode==='all'){
+    const partStart = q.part==='放水版' ? 0 : QUIZ.easy.length;
+    const localIdx = state.idx - partStart + 1;
+    const partTotal = q.part==='放水版' ? QUIZ.easy.length : QUIZ.hard.length;
+    qLabel = `[${q.part}] Q${localIdx}/${partTotal}`;
+  } else {
+    qLabel = `Q${state.idx+1}/${total}`;
+  }
+
+  let html = `<div class="progress"><div style="width:${progress}%"></div></div>`;
+  html += `<div class="card" id="q-card">`;
+  html += `<div class="q-head"><span class="q-num">${qLabel}</span><span class="q-tag ${typeCls}">${typeTag}</span></div>`;
+  html += `<p class="q-text">${q.t}</p>`;
+
+  if(q.type==='single'||q.type==='multi'){
+    html += `<div class="opts" id="opts">`;
+    q.opts.forEach((o,i)=>{
+      const L = optLabel(i);
+      html += `<label class="opt" data-letter="${L}">`;
+      html += `<input type="${q.type==='multi'?'checkbox':'radio'}" name="q" value="${L}">`;
+      html += `<span class="letter">${L}</span><span>${o}</span>`;
+      html += `</label>`;
+    });
+    html += `</div>`;
+  } else if(q.type==='fill'){
+    html += `<input type="text" class="q-input" id="qinput" placeholder="在这里输入你的答案…">`;
+  } else if(q.type==='short'){
+    html += `<textarea class="q-input" id="qinput" placeholder="简答：不为空即得分，合理即满分…"></textarea>`;
+  }
+
+  html += `<div class="action-row">`;
+  html += `<button class="btn" id="submit-btn">提交 // SUBMIT</button>`;
+  html += `<span style="color:var(--dim);font-size:.8rem">当前得分：<b style="color:var(--a1)">${state.score}</b></span>`;
+  html += `</div>`;
+  html += `<div id="fb"></div>`;
+  html += `</div>`;
+  area.innerHTML = html;
+
+  // 绑定
+  if(q.type==='single'||q.type==='multi'){
+    document.querySelectorAll('.opt').forEach(o=>{
+      o.onclick = e=>{
+        if(o.classList.contains('locked')) return;
+        const inp = o.querySelector('input');
+        if(e.target.tagName!=='INPUT') inp.checked = !inp.checked;
+        o.classList.toggle('picked', inp.checked);
+      };
+    });
+  }
+  $('#submit-btn').onclick = submit;
+}
+
+/* ============ 提交 ============ */
+function submit(){
+  const list = buildList(state.mode);
+  const q = list[state.idx];
+  let picked=[], text='';
+  if(q.type==='single'||q.type==='multi'){
+    document.querySelectorAll('.opt input:checked').forEach(i=>picked.push(i.value));
+    if(!picked.length){ alert('请先选择一个选项'); return; }
+  } else {
+    text = document.querySelector('#qinput').value;
+    if(!text.trim() && q.type==='fill'){ alert('请输入答案'); return; }
+  }
+  const score = grade(q, picked, text);
+  state.score += score;
+  state.answers.push({q:q.t, score, picked, text});
+
+  // 反馈
+  const fb = $('#fb');
+  let cls = score===1 ? 'ok' : score===0.5 ? 'half' : 'ng';
+  let tag = score===1 ? '✓ 完全正确 +1' : score===0.5 ? '◐ 部分正确 +0.5' : '✗ 回答错误 +0';
+  let ansHtml = '';
+  if(q.type==='single'||q.type==='multi'){
+    const ansText = q.ans.map(l=>l+'. '+q.opts[l.charCodeAt(0)-65]).join('，');
+    ansHtml = `<div class="ans">正确答案：<b>${ansText}</b></div>`;
+    document.querySelectorAll('.opt').forEach(o=>{
+      o.classList.add('locked');
+      const L = o.dataset.letter;
+      const isAns = q.ans.includes(L);
+      const isPick = picked.includes(L);
+      if(isAns) o.classList.add('correct');
+      else if(isPick) o.classList.add('wrong');
+      o.querySelector('input').disabled = true;
+    });
+  } else {
+    ansHtml = `<div class="ans">参考答案：<b>${q.ansText||q.ans}</b></div>`;
+  }
+  fb.innerHTML = `<div class="feedback ${cls}"><span class="tag ${cls}">${tag}</span>${ansHtml}</div>`;
+
+  const btn = $('#submit-btn');
+  const isLast = state.idx+1 >= list.length;
+  btn.textContent = isLast ? '查看总分 // RESULT' : '下一题 // NEXT';
+  btn.classList.add('ghost');
+  btn.onclick = ()=>{ state.idx++; render(); };
+}
+
+/* ============ 总分 ============ */
+function renderFinal(){
+  const list = buildList(state.mode);
+  const total = list.length;
+  const pct = (state.score/total)*100;
+  let level, desc;
+  if(state.score >= total*0.95){ level='你看答案了吧?'; desc='这个分数已经不是了解了，建议当我肚子里的蛔虫。'; }
+  else if(state.score >= total*0.8){ level='很熟悉我'; desc='这分数很可以。'; }
+  else if(state.score >= total*0.5){ level='挺了解的'; desc='基本盘清楚了。'; }
+  else { level='???'; desc='才这么点分？我们可能需要重新认识一下。'; }
+
+  if(state.mode==='easy' && state.score===total) level = '放水满分，试试地狱版！';
+  if(state.mode==='hard' && state.score===total) level = '恭喜！！！（偷看答案了吧';
+  if(state.mode==='all' && state.score===25) level = '满分！满分啊！';
+
+  const html = `
+    <div class="progress"><div style="width:100%"></div></div>
+    <div class="final">
+      <div class="score">${state.score}<small> / ${total}</small></div>
+      <div class="level">${level}</div>
+      <p class="desc">${desc}</p>
+      <div class="breakdown">
+        <div class="b-item"><div class="k">正确率</div><div class="v">${pct.toFixed(0)}%</div></div>
+        <div class="b-item"><div class="k">已答题数</div><div class="v">${total} / ${total}</div></div>
+      </div>
+      <div class="action-row" style="justify-content:center;flex-wrap:wrap">
+        <button class="btn ghost" onclick="setMode('all')">🏆 重玩完整挑战</button>
+        <button class="btn ghost" onclick="setMode('easy')">只刷放水版</button>
+        <button class="btn" onclick="setMode('hard')">只刷地狱版</button>
+        <a class="btn ghost" href="index.html" style="text-decoration:none">← 回主页</a>
+      </div>
+    </div>`;
+  area.innerHTML = html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ 主题切换 ============ */
+var THEMES = [
+  { id: 'modern', name: 'MODERN', icon: 'fa-feather' },
+  { id: 'star',   name: 'STAR',   icon: 'fa-star' },
+  { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' }
+];
+var qThemeBtn = document.getElementById('theme-toggle');
+function qCurrentTheme(){ return document.documentElement.dataset.theme || 'cyber'; }
+function qApplyTheme(id){
+  document.documentElement.dataset.theme = id;
+  try{ localStorage.setItem('codej-theme', id); }catch(e){}
+  var t = THEMES.find(function(x){ return x.id===id; });
+  if(qThemeBtn && t){
+    qThemeBtn.innerHTML = '<i class="fas ' + t.icon + '"></i> ' + t.name;
+    var next = THEMES[(THEMES.indexOf(t)+1) % THEMES.length];
+    qThemeBtn.title = '切换主题 → ' + next.name;
+  }
+}
+if(qThemeBtn){
+  qThemeBtn.addEventListener('click', function(){
+    var idx = THEMES.findIndex(function(t){ return t.id === qCurrentTheme(); });
+    qApplyTheme(THEMES[(idx+1) % THEMES.length].id);
+  });
+}
+qApplyTheme(qCurrentTheme());
+
+render();
+
+</script>
+</body>
+</html>
