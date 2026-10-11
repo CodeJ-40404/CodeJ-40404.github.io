@@ -4,7 +4,7 @@
 
 ## 为什么要偷懒？
 
-C++ 的样板代码是出了名的多。每次写小工具或者算法题，都要重复一堆 `#include`、`using namespace std;`、类型声明……作为一个懒人，我受够了。
+C++ 的样板代码是出了名的多。每次写小工具或者算法题，都要重复一堆 `#include`、`using namespace xxx;`、类型声明……作为一个懒人，我受够了。
 
 ## 设计原则
 
@@ -23,14 +23,6 @@ int main() {
     return 0;
 }
 ```
-
-## 一些实现笔记
-
-惰性求值的核心是把「计算」推迟到真正需要结果的那一刻，配合 C++ 的模板可以在编译期完成很多分发：
-
-$\text{lazy}(f) \equiv \lambda x.\, f(x) \ \text{evaluated on demand}$
-
-模板元编程里常见的 `if constexpr` 分发、SFINAE 检测，都是让"懒"成立的基础设施。
 
 ## 链接
 
