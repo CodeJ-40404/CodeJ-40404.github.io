@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逃离棍木 · 无限增殖</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 50%);
+            background-size: 100% 4px;
+        }
+
+        h1 {
+            color: #ff0000;
+            text-shadow: 2px 2px #000, 0 0 10px #f00;
+            letter-spacing: 5px;
+            z-index: 10;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        #game-container {
+            position: relative;
+            width: 700px;
+            height: 500px;
+            background: #000;
+            border: 4px solid #333;
+            box-shadow: 0 0 20px #0f0, inset 0 0 20px #000;
+            overflow: hidden;
+            user-select: none;
+            background-image: 
+                linear-gradient(rgba(15, 255, 0, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 255, 0, 0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transition: box-shadow 0.15s;
+        }
+        #world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .entity {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        #player {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+            z-index: 20;
+            width: 30px;
+            height: 30px;
+            font-size: 26px;
+            transition: none;
+        }
+
+        .obstacle {
+            color: #444;
+            text-shadow: 0 0 6px #222;
+            width: 40px;
+            height: 40px;
+            font-size: 22px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trap {
+            color: #ffaa00;
+            text-shadow: 0 0 12px #ff8800;
+            width: 30px;
+            height: 30px;
+            font-size: 26px;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: trapPulse 1.2s infinite alternate;
+        }
+        @keyframes trapPulse {
+            0% { opacity: 0.6; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 20px #ff6600; }
+        }
+
+        .gunmu {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            z-index: 15;
+            pointer-events: none;
+            transition: transform 0.1s linear, filter 0.3s, width 0.2s, height 0.2s;
+            transform-origin: center center;
+            will-change: transform, left, top;
+        }
+        
+        .gunmu-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            mix-blend-mode: screen; 
+            opacity: 0.95;
+            clip-path: polygon(10% 0, 90% 5%, 100% 50%, 85% 95%, 15% 100%, 0 60%);
+            transition: filter 0.2s;
+        }
+
+        .survivor {
+            position: absolute;
+            color: #88aaff;
+            text-shadow: 0 0 8px #4488ff;
+            font-size: 22px;
+            font-weight: bold;
+            z-index: 12;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.1s linear, top 0.1s linear;
+            will-change: left, top;
+        }
+
+        #danger-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background: rgba(255, 0, 0, 0);
+            z-index: 30;
+            transition: background 0.2s;
+        }
+        #jumpscare-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.1s;
+            background: black;
+        }
+        #jumpscare-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        #jumpscare-img {
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 1200px;
+            max-height: 1200px;
+            object-fit: contain;
+            filter: contrast(300%) sepia(100%) hue-rotate(-30deg) saturate(800%) brightness(1.5);
+            mix-blend-mode: screen;
+            animation: jumpscareShake 0.07s infinite;
+            transform: scale(1.2);
+            clip-path: polygon(5% 0%, 95% 5%, 100% 50%, 88% 98%, 12% 100%, 0% 55%);
+        }
+        @keyframes jumpscareShake {
+            0% { transform: translate(6px, 4px) rotate(0.8deg) scale(1.15); }
+            25% { transform: translate(-7px, -6px) rotate(-1deg) scale(1.18); }
+            50% { transform: translate(-8px, 8px) rotate(1.2deg) scale(1.12); }
+            75% { transform: translate(7px, -5px) rotate(-0.7deg) scale(1.2); }
+            100% { transform: translate(-4px, 6px) rotate(0.5deg) scale(1.16); }
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #0f0;
+            font-size: 12px;
+            text-shadow: 1px 1px #000;
+            z-index: 50;
+            opacity: 0.8;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        #distance-meter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #0f0;
+            font-size: 12px;
+            z-index: 50;
+            transition: color 0.2s;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ff0000;
+            font-size: 40px;
+            font-weight: bold;
+            text-shadow: 0 0 20px red;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .shake {
+            animation: shake 0.1s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(2px, 2px) rotate(0.5deg); }
+            20% { transform: translate(-2px, -3px) rotate(-0.5deg); }
+            40% { transform: translate(-3px, 0px) rotate(0.5deg); }
+            60% { transform: translate(3px, 2px) rotate(-0.5deg); }
+            80% { transform: translate(1px, -2px) rotate(0.5deg); }
+            100% { transform: translate(2px, -1px) rotate(0.5deg); }
+        }
+        .jumpscare-body-shake {
+            animation: bodyShake 0.06s infinite;
+        }
+        @keyframes bodyShake {
+            0% { transform: translate(8px, 6px) rotate(1deg); }
+            20% { transform: translate(-9px, -8px) rotate(-1.2deg); }
+            40% { transform: translate(-10px, 10px) rotate(1.5deg); }
+            60% { transform: translate(9px, -7px) rotate(-0.9deg); }
+            80% { transform: translate(-6px, 9px) rotate(0.7deg); }
+            100% { transform: translate(10px, -5px) rotate(-1.1deg); }
+        }
+
+        /* ---- 开始菜单样式 ---- */
+        #start-menu {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #start-menu h2 {
+            color: #ff0000;
+            text-shadow: 0 0 15px red;
+            font-size: 48px;
+            margin: 0;
+            letter-spacing: 8px;
+        }
+        .menu-btn {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 12px 40px;
+            font-size: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            border-radius: 4px;
+        }
+        .menu-btn:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 30px #0f0;
+        }
+        .menu-btn:active {
+            transform: scale(0.96);
+        }
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            border: 2px dashed #0f0;
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        .upload-area label {
+            color: #0f0;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        #preview-img {
+            max-width: 120px;
+            max-height: 120px;
+            border: 2px solid #0f0;
+            border-radius: 4px;
+            object-fit: cover;
+            margin-top: 5px;
+        }
+        .info-text {
+            color: #aaa;
+            font-size: 14px;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+        .info-text span {
+            color: #0f0;
+        }
+        #gunmu-count-display {
+            color: #ff5555;
+            font-size: 18px;
+            text-shadow: 0 0 8px #f00;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>[ 逃 离 棍 木 · 无 限 增 殖 ]</h1>
+
+    <div id="game-container">
+        <div id="world">
+            <div id="player" class="entity">@</div>
+        </div>
+        
+        <div id="danger-overlay"></div>
+
+        <div id="ui">W A S D 移动 · 小心陷阱 ^ · 棍木会不断增殖</div>
+        <div id="distance-meter">距离: 安全</div>
+
+        <div id="game-over">
+            <div>你被棍木抓住了。</div>
+            <div style="font-size: 20px; color: #aaa; margin-top: 20px;">按 R 键重试</div>
+        </div>
+    </div>
+
+    <div id="jumpscare-overlay">
+        <img id="jumpscare-img" src="gunmu.png" alt="棍木突脸">
+    </div>
+
+    <!-- 开始菜单 -->
+    <div id="start-menu">
+        <h2>逃 离 棍 木</h2>
+        <div class="info-text">
+            无限地图 · 多个棍木不断增殖 · 小心尖刺陷阱<br>
+            你的目标是尽可能活得久一些
+        </div>
+        <div class="upload-area">
+            <label for="image-upload">📷 点击上传自定义棍木图片</label>
+            <input type="file" id="image-upload" accept="image/*">
+            <img id="preview-img" src="gunmu.png" alt="预览" style="display: block;">
+            <div style="font-size: 12px; color: #888;">默认图片: gunmu.png</div>
+        </div>
+        <button class="menu-btn" id="start-btn">开 始 游 戏</button>
+        <div id="gunmu-count-display">当前棍木数量: 0</div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 配置 ----------
+            const CONFIG = {
+                obstacleCount: 120,
+                trapCount: 40,
+                initialGunmuCount: 6,          // 初始棍木数量
+                maxGunmuCount: 35,              // 最大棍木数量
+                gunmuSpawnInterval: 2000,       // 每2秒尝试生成一个新的棍木
+                survivorCount: 7,
+                worldSize: 6000,
+                playerSpeed: 3.8,
+                gunmuBaseSpeed: 2.2,
+                survivorSpeed: 2.9,
+                obstacleSize: 40,
+                trapSize: 30,
+                gunmuSize: 44,
+                survivorSize: 28,
+                playerRadius: 12,
+                gunmuCatchRadius: 28,
+                jumpscareRadius: 55,
+                warningRadius: 120,
+                farRadius: 180,
+                // 动态回收参数
+                SPAWN_RADIUS: 1400,
+                DESPAWN_RADIUS: 2200,
+                MAX_OBSTACLES: 80,
+                MAX_TRAPS: 30,
+                MAX_SURVIVORS: 7
+            };
+
+            // ---------- DOM 元素 ----------
+            const container = document.getElementById('game-container');
+            const worldEl = document.getElementById('world');
+            const playerEl = document.getElementById('player');
+            const dangerOverlay = document.getElementById('danger-overlay');
+            const gameOverEl = document.getElementById('game-over');
+            const distanceMeter = document.getElementById('distance-meter');
+            const jumpscareOverlay = document.getElementById('jumpscare-overlay');
+            const jumpscareImg = document.getElementById('jumpscare-img');
+            const gameContainer = container;
+            const startMenu = document.getElementById('start-menu');
+            const startBtn = document.getElementById('start-btn');
+            const imageUpload = document.getElementById('image-upload');
+            const previewImg = document.getElementById('preview-img');
+            const gunmuCountDisplay = document.getElementById('gunmu-count-display');
+
+            // ---------- 全局状态 ----------
+            let isGameOver = false;
+            let gameStarted = false;         // 是否已开始游戏
+            let keys = { w: false, a: false, s: false, d: false };
+            let player = { x: 0, y: 0 };
+            let camera = { x: 0, y: 0 };
+
+            let gunmus = [];
+            let obstacles = [];
+            let traps = [];
+            let survivors = [];
+
+            // 棍木生成计时
+            let gunmuSpawnTimer = null;
+            let gunmuGenerationActive = false;
+
+            // 图片源（可从上传替换）
+            let gunmuImageSrc = 'gunmu.png';
+
+            // 惊吓相关
+            let lastgunmuDist = 9999;
+            let jumpscareActive = false;
+            let jumpscareTimer = null;
+            let jumpscareCooldown = false;
+
+            // ---------- 工具函数 ----------
+            function randomRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            // 更新棍木数量显示
+            function updateGunmuCountDisplay() {
+                gunmuCountDisplay.textContent = `当前棍木数量: ${gunmus.length}`;
+            }
+
+            // 创建视觉元素
+            function createGunmuElement() {
+                const el = document.createElement('div');
+                el.className = 'gunmu';
+                const img = document.createElement('img');
+                img.className = 'gunmu-img';
+                img.src = gunmuImageSrc;
+                img.alt = '棍木';
+                el.appendChild(img);
+                worldEl.appendChild(el);
+                return { el, imgEl: img };
+            }
+
+            function createObstacleElement() {
+                const el = document.createElement('div');
+                el.className = 'entity obstacle';
+                el.textContent = '*';
+                worldEl.appendChild(el);
+                return el;
+            }
+
+            function createTrapElement() {
+                const el = document.createElement('div');
+                el.className = 'entity trap';
+                el.textContent = '^';
+                worldEl.appendChild(el);
+                return el;
+            }
+
+            function createSurvivorElement() {
+                const el = document.createElement('div');
+                el.className = 'survivor';
+                el.textContent = '逃';
+                worldEl.appendChild(el);
+                return el;
+            }
+
+            // 清除所有动态物体
+            function clearAllObjects() {
+                document.querySelectorAll('.gunmu, .obstacle, .trap, .survivor').forEach(el => el.remove());
+                gunmus = [];
+                obstacles = [];
+                traps = [];
+                survivors = [];
+                updateGunmuCountDisplay();
+            }
+
+            // 初始化世界（开始游戏时调用）
+            function initWorld() {
+                clearAllObjects();
+                if (gunmuSpawnTimer) {
+                    clearInterval(gunmuSpawnTimer);
+                    gunmuSpawnTimer = null;
+                }
+
+                // 玩家初始位置
+                player.x = 0;
+                player.y = 0;
+
+                // 初始生成一定数量的棍木
+                for (let i = 0; i < CONFIG.initialGunmuCount; i++) {
+                    spawnGunmu(true);
+                }
+                updateGunmuCountDisplay();
+
+                // 障碍
+                for (let i = 0; i < CONFIG.MAX_OBSTACLES; i++) {
+                    spawnObstacleNearPlayer();
+                }
+                // 陷阱
+                for (let i = 0; i < CONFIG.MAX_TRAPS; i++) {
+                    spawnTrapNearPlayer();
+                }
+                // 幸存者
+                for (let i = 0; i < CONFIG.MAX_SURVIVORS; i++) {
+                    spawnSurvivorNearPlayer();
+                }
+
+                // 重置相机
+                camera.x = player.x;
+                camera.y = player.y;
+                worldEl.style.transform = `translate(${container.offsetWidth / 2 - camera.x}px, ${container.offsetHeight / 2 - camera.y}px)`;
+
+                // 重置状态
+                isGameOver = false;
+                jumpscareActive = false;
+                jumpscareCooldown = false;
+                jumpscareOverlay.classList.remove('active');
+                document.body.classList.remove('jumpscare-body-shake');
+                if (jumpscareTimer) {
+                    clearTimeout(jumpscareTimer);
+                    jumpscareTimer = null;
+                }
+                lastgunmuDist = 9999;
+                gameOverEl.style.display = 'none';
+                gameContainer.classList.remove('shake');
+                gameContainer.style.boxShadow = '0 0 20px #0f0, inset 0 0 20px #000';
+                dangerOverlay.style.background = 'rgba(255,0,0,0)';
+                distanceMeter.textContent = '距离: 安全';
+                distanceMeter.style.color = '#0f0';
+
+                playerEl.style.left = (player.x - 15) + 'px';
+                playerEl.style.top = (player.y - 15) + 'px';
+
+                // 启动棍木持续生成
+                gunmuGenerationActive = true;
+                gunmuSpawnTimer = setInterval(() => {
+                    if (isGameOver || !gameStarted) return;
+                    if (gunmus.length >= CONFIG.maxGunmuCount) return;
+                    // 有一定概率生成
+                    if (Math.random() < 0.6) {
+                        spawnGunmu(false);
+                        updateGunmuCountDisplay();
+                    }
+                }, CONFIG.gunmuSpawnInterval);
+            }
+
+            // 生成一个棍木，forceNearPlayer 为true时强制生成在玩家周围较远距离
+            function spawnGunmu(forceNearPlayer = false) {
+                if (gunmus.length >= CONFIG.maxGunmuCount) return;
+                let gx, gy;
+                if (forceNearPlayer) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = randomRange(500, 900);
+                    gx = player.x + Math.cos(angle) * dist;
+                    gy = player.y + Math.sin(angle) * dist;
+                } else {
+                    // 随机在玩家周围一定范围内生成
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = randomRange(400, 1200);
+                    gx = player.x + Math.cos(angle) * dist;
+                    gy = player.y + Math.sin(angle) * dist;
+                }
+                const { el, imgEl } = createGunmuElement();
+                el.style.left = (gx - CONFIG.gunmuSize / 2) + 'px';
+                el.style.top = (gy - CONFIG.gunmuSize / 2) + 'px';
+                gunmus.push({
+                    x: gx, y: gy, el, imgEl,
+                    speedOffset: randomRange(-0.3, 0.6)
+                });
+            }
+
+            function spawnObstacleNearPlayer() {
+                let ox, oy;
+                let attempts = 0;
+                do {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = randomRange(120, CONFIG.SPAWN_RADIUS);
+                    ox = player.x + Math.cos(angle) * dist;
+                    oy = player.y + Math.sin(angle) * dist;
+                    attempts++;
+                } while (Math.hypot(ox - player.x, oy - player.y) < 150 && attempts < 30);
+
+                const el = createObstacleElement();
+                el.style.left = (ox - CONFIG.obstacleSize / 2) + 'px';
+                el.style.top = (oy - CONFIG.obstacleSize / 2) + 'px';
+                obstacles.push({ x: ox, y: oy, el });
+            }
+
+            function spawnTrapNearPlayer() {
+                let ox, oy;
+                let attempts = 0;
+                do {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = randomRange(100, CONFIG.SPAWN_RADIUS);
+                    ox = player.x + Math.cos(angle) * dist;
+                    oy = player.y + Math.sin(angle) * dist;
+                    attempts++;
+                } while (Math.hypot(ox - player.x, oy - player.y) < 80 && attempts < 30);
+
+                const el = createTrapElement();
+                el.style.left = (ox - CONFIG.trapSize / 2) + 'px';
+                el.style.top = (oy - CONFIG.trapSize / 2) + 'px';
+                traps.push({ x: ox, y: oy, el });
+            }
+
+            function spawnSurvivorNearPlayer() {
+                let ox, oy;
+                let attempts = 0;
+                do {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = randomRange(200, CONFIG.SPAWN_RADIUS);
+                    ox = player.x + Math.cos(angle) * dist;
+                    oy = player.y + Math.sin(angle) * dist;
+                    attempts++;
+                } while (Math.hypot(ox - player.x, oy - player.y) < 120 && attempts < 30);
+
+                const el = createSurvivorElement();
+                el.style.left = (ox - CONFIG.survivorSize / 2) + 'px';
+                el.style.top = (oy - CONFIG.survivorSize / 2) + 'px';
+                survivors.push({
+                    x: ox, y: oy, el,
+                    targetX: player.x + randomRange(-300, 300),
+                    targetY: player.y + randomRange(-300, 300),
+                    changeTimer: 0,
+                    speed: CONFIG.survivorSpeed * randomRange(0.8, 1.2)
+                });
+            }
+
+            // 动态回收
+            function recycleObjects() {
+                // 障碍
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const obs = obstacles[i];
+                    const dist = Math.hypot(obs.x - player.x, obs.y - player.y);
+                    if (dist > CONFIG.DESPAWN_RADIUS) {
+                        obs.el.remove();
+                        obstacles.splice(i, 1);
+                    }
+                }
+                while (obstacles.length < CONFIG.MAX_OBSTACLES) {
+                    spawnObstacleNearPlayer();
+                }
+
+                // 陷阱
+                for (let i = traps.length - 1; i >= 0; i--) {
+                    const trap = traps[i];
+                    const dist = Math.hypot(trap.x - player.x, trap.y - player.y);
+                    if (dist > CONFIG.DESPAWN_RADIUS) {
+                        trap.el.remove();
+                        traps.splice(i, 1);
+                    }
+                }
+                while (traps.length < CONFIG.MAX_TRAPS) {
+                    spawnTrapNearPlayer();
+                }
+
+                // 幸存者
+                for (let i = survivors.length - 1; i >= 0; i--) {
+                    const s = survivors[i];
+                    const dist = Math.hypot(s.x - player.x, s.y - player.y);
+                    if (dist > CONFIG.DESPAWN_RADIUS) {
+                        s.el.remove();
+                        survivors.splice(i, 1);
+                    }
+                }
+                while (survivors.length < CONFIG.MAX_SURVIVORS) {
+                    spawnSurvivorNearPlayer();
+                }
+
+                // 棍木：如果离玩家太远（>1800），将其重置到玩家周围（保持压力），不删除
+                for (let g of gunmus) {
+                    const dist = Math.hypot(g.x - player.x, g.y - player.y);
+                    if (dist > 1800) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const newDist = randomRange(700, 1000);
+                        g.x = player.x + Math.cos(angle) * newDist;
+                        g.y = player.y + Math.sin(angle) * newDist;
+                        g.el.style.left = (g.x - CONFIG.gunmuSize / 2) + 'px';
+                        g.el.style.top = (g.y - CONFIG.gunmuSize / 2) + 'px';
+                    }
+                }
+            }
+
+            // 碰撞检测
+            function checkObstacleCollision(x, y, radius) {
+                for (let obs of obstacles) {
+                    const half = CONFIG.obstacleSize / 2;
+                    const closestX = Math.max(obs.x - half, Math.min(x, obs.x + half));
+                    const closestY = Math.max(obs.y - half, Math.min(y, obs.y + half));
+                    const distance = Math.hypot(x - closestX, y - closestY);
+                    if (distance < radius) return true;
+                }
+                return false;
+            }
+
+            function checkTrapCollision(x, y, radius) {
+                for (let i = traps.length - 1; i >= 0; i--) {
+                    const trap = traps[i];
+                    const dist = Math.hypot(x - trap.x, y - trap.y);
+                    if (dist < radius + 8) {
+                        trap.el.remove();
+                        traps.splice(i, 1);
+                        spawnTrapNearPlayer();
+                        triggerJumpscare('trap');
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // 触发惊吓
+            function triggerJumpscare(type = 'gunmu') {
+                if (jumpscareActive || jumpscareCooldown || isGameOver) return;
+
+                jumpscareActive = true;
+                jumpscareCooldown = true;
+                jumpscareOverlay.classList.add('active');
+                document.body.classList.add('jumpscare-body-shake');
+                jumpscareImg.style.clipPath = `polygon(${randomRange(0, 15)}% ${randomRange(0, 10)}%, ${randomRange(85, 100)}% ${randomRange(0, 10)}%, ${randomRange(90, 100)}% ${randomRange(40, 60)}%, ${randomRange(85, 95)}% ${randomRange(90, 100)}%, ${randomRange(5, 15)}% ${randomRange(90, 100)}%, ${randomRange(0, 10)}% ${randomRange(40, 60)}%)`;
+                dangerOverlay.style.background = 'rgba(255,0,0,0.9)';
+                gameContainer.classList.add('shake');
+                gameContainer.style.boxShadow = '0 0 80px #f00, inset 0 0 80px #f00';
+                jumpscareTimer = setTimeout(() => {
+                    jumpscareOverlay.classList.remove('active');
+                    document.body.classList.remove('jumpscare-body-shake');
+                    jumpscareActive = false;
+                    setTimeout(() => {
+                        jumpscareCooldown = false;
+                    }, 4000);
+                    if (!isGameOver) {
+                        dangerOverlay.style.background = 'rgba(255,0,0,0.1)';
+                    }
+                    jumpscareTimer = null;
+                }, 1500);
+            }
+
+            // 主更新
+            function update() {
+                if (isGameOver || !gameStarted) {
+                    requestAnimationFrame(update);
+                    return;
+                }
+
+                // 玩家移动
+                let dx = 0, dy = 0;
+                if (keys.w) dy -= 1;
+                if (keys.s) dy += 1;
+                if (keys.a) dx -= 1;
+                if (keys.d) dx += 1;
+
+                if (dx !== 0 || dy !== 0) {
+                    const len = Math.hypot(dx, dy);
+                    dx = (dx / len) * CONFIG.playerSpeed;
+                    dy = (dy / len) * CONFIG.playerSpeed;
+
+                    if (!checkObstacleCollision(player.x + dx, player.y, CONFIG.playerRadius)) {
+                        player.x += dx;
+                    }
+                    if (!checkObstacleCollision(player.x, player.y + dy, CONFIG.playerRadius)) {
+                        player.y += dy;
+                    }
+                }
+
+                checkTrapCollision(player.x, player.y, CONFIG.playerRadius);
+
+                // 幸存者
+                for (let s of survivors) {
+                    s.changeTimer -= 0.016;
+                    if (s.changeTimer <= 0 || Math.hypot(s.targetX - s.x, s.targetY - s.y) < 50) {
+                        s.targetX = player.x + randomRange(-600, 600);
+                        s.targetY = player.y + randomRange(-600, 600);
+                        s.changeTimer = randomRange(2, 5);
+                    }
+                    const dx2 = s.targetX - s.x;
+                    const dy2 = s.targetY - s.y;
+                    const dist2 = Math.hypot(dx2, dy2);
+                    if (dist2 > 10) {
+                        const moveX = (dx2 / dist2) * s.speed;
+                        const moveY = (dy2 / dist2) * s.speed;
+                        s.x += moveX;
+                        s.y += moveY;
+                        s.el.style.left = (s.x - CONFIG.survivorSize / 2) + 'px';
+                        s.el.style.top = (s.y - CONFIG.survivorSize / 2) + 'px';
+                    }
+                }
+
+                // 棍木追踪玩家
+                let nearestGunmuDist = Infinity;
+                for (let g of gunmus) {
+                    const gdx = player.x - g.x;
+                    const gdy = player.y - g.y;
+                    const gDist = Math.hypot(gdx, gdy);
+
+                    if (gDist < nearestGunmuDist) nearestGunmuDist = gDist;
+
+                    let speed = CONFIG.gunmuBaseSpeed + (gDist > 400 ? 1.8 : 0) + g.speedOffset;
+
+                    if (gDist > 0.5) {
+                        g.x += (gdx / gDist) * speed;
+                        g.y += (gdy / gDist) * speed;
+                    }
+                    g.el.style.left = (g.x - CONFIG.gunmuSize / 2) + 'px';
+                    g.el.style.top = (g.y - CONFIG.gunmuSize / 2) + 'px';
+                }
+
+                const newDist = nearestGunmuDist;
+
+                // 惊吓判定
+                if (!jumpscareActive && !jumpscareCooldown && !isGameOver) {
+                    if (newDist < CONFIG.jumpscareRadius) {
+                        triggerJumpscare('gunmu');
+                    } else if (lastgunmuDist > 180 && newDist < CONFIG.warningRadius) {
+                        triggerJumpscare('gunmu');
+                    } else if (newDist < 140 && Math.random() < 0.035) {
+                        triggerJumpscare('gunmu');
+                    }
+                }
+                lastgunmuDist = newDist;
+
+                if (newDist < CONFIG.gunmuCatchRadius) {
+                    triggerGameOver();
+                }
+
+                // 回收与生成
+                recycleObjects();
+
+                // 相机
+                camera.x += (player.x - camera.x) * 0.1;
+                camera.y += (player.y - camera.y) * 0.1;
+                worldEl.style.transform = `translate(${container.offsetWidth / 2 - camera.x}px, ${container.offsetHeight / 2 - camera.y}px)`;
+
+                playerEl.style.left = (player.x - 15) + 'px';
+                playerEl.style.top = (player.y - 15) + 'px';
+
+                updateHorrorEffects(newDist);
+
+                requestAnimationFrame(update);
+            }
+
+            function updateHorrorEffects(distance) {
+                if (jumpscareActive) {
+                    distanceMeter.textContent = `距离: 极度危险！`;
+                    distanceMeter.style.color = '#f00';
+                    return;
+                }
+
+                if (distance < 100) {
+                    gameContainer.classList.add('shake');
+                    gameContainer.style.boxShadow = '0 0 40px #f00, inset 0 0 40px #f00';
+                    dangerOverlay.style.background = `rgba(255, 0, 0, ${0.6 - (distance / 100) * 0.6})`;
+                    distanceMeter.textContent = `距离: 极度危险！`;
+                    distanceMeter.style.color = '#f00';
+                } else if (distance < 250) {
+                    gameContainer.classList.remove('shake');
+                    gameContainer.style.boxShadow = '0 0 20px #f00, inset 0 0 20px #000';
+                    dangerOverlay.style.background = `rgba(255, 0, 0, 0.1)`;
+                    distanceMeter.textContent = `距离: 危险`;
+                    distanceMeter.style.color = '#f80';
+                } else {
+                    gameContainer.classList.remove('shake');
+                    gameContainer.style.boxShadow = '0 0 20px #0f0, inset 0 0 20px #000';
+                    dangerOverlay.style.background = `rgba(255, 0, 0, 0)`;
+                    distanceMeter.textContent = `距离: 安全`;
+                    distanceMeter.style.color = '#0f0';
+                }
+            }
+
+            function triggerGameOver() {
+                if (isGameOver) return;
+                isGameOver = true;
+                gameOverEl.style.display = 'flex';
+                gameContainer.classList.add('shake');
+                dangerOverlay.style.background = 'rgba(255, 0, 0, 0.8)';
+
+                if (jumpscareActive) {
+                    jumpscareOverlay.classList.remove('active');
+                    document.body.classList.remove('jumpscare-body-shake');
+                    jumpscareActive = false;
+                    if (jumpscareTimer) {
+                        clearTimeout(jumpscareTimer);
+                        jumpscareTimer = null;
+                    }
+                }
+
+                // 停止生成
+                gunmuGenerationActive = false;
+                if (gunmuSpawnTimer) {
+                    clearInterval(gunmuSpawnTimer);
+                    gunmuSpawnTimer = null;
+                }
+            }
+
+            // ---------- 键盘监听 ----------
+            window.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                if (isGameOver) {
+                    if (key === 'r') {
+                        // 重置游戏
+                        isGameOver = false;
+                        gameStarted = true;
+                        initWorld();
+                    }
+                    return;
+                }
+
+                if (!gameStarted) return;
+
+                if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+                    e.preventDefault();
+                }
+
+                switch (key) {
+                    case 'w': case 'arrowup': keys.w = true; break;
+                    case 's': case 'arrowdown': keys.s = true; break;
+                    case 'a': case 'arrowleft': keys.a = true; break;
+                    case 'd': case 'arrowright': keys.d = true; break;
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                const key = e.key.toLowerCase();
+                switch (key) {
+                    case 'w': case 'arrowup': keys.w = false; break;
+                    case 's': case 'arrowdown': keys.s = false; break;
+                    case 'a': case 'arrowleft': keys.a = false; break;
+                    case 'd': case 'arrowright': keys.d = false; break;
+                }
+            });
+
+            // ---------- 开始菜单交互 ----------
+            imageUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const dataUrl = ev.target.result;
+                    gunmuImageSrc = dataUrl;
+                    previewImg.src = dataUrl;
+                    // 更新所有已存在的棍木图片（如果已经开始游戏，但开始菜单阶段没有）
+                    // 游戏开始后生成的棍木会用新的图
+                };
+                reader.readAsDataURL(file);
+            });
+
+            startBtn.addEventListener('click', () => {
+                startMenu.style.display = 'none';
+                gameStarted = true;
+                initWorld();
+                requestAnimationFrame(update);
+            });
+
+            // 初始显示棍木数量
+            updateGunmuCountDisplay();
+
+            // 预先加载默认图片，如果加载失败也不影响
+        })();
+    </script>
+</body>
+</html>

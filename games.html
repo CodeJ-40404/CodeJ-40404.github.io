@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="cyber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏厅 // GAME_ARCADE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<script>
+  // 同步主页保存的主题偏好
+  (function(){
+    try{
+      var t = localStorage.getItem('codej-theme') || 'cyber';
+      document.documentElement.setAttribute('data-theme', t);
+    }catch(e){}
+  })();
+</script>
+<style>
+  .games-wrap{ max-width: 1000px; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+  .games-topbar{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.6rem; gap: 1rem; flex-wrap: wrap; }
+  .games-back{
+    display: inline-flex; align-items: center; gap: .5rem;
+    color: var(--a1); text-decoration: none; font-size: .8rem;
+    letter-spacing: 2px; opacity: .85; transition: opacity .2s;
+  }
+  .games-back:hover{ opacity: 1; text-shadow: var(--glow-a1); }
+  .games-header{ margin-bottom: 2rem; }
+  .games-title{ font-size: 1.8rem; margin: 0 0 .5rem; color: var(--a1); text-shadow: var(--glow-a1); letter-spacing: 2px; }
+  .games-sub{ color: var(--dim); font-size: .9rem; line-height: 1.8; }
+  .games-sub b{ color: var(--a2); }
+
+  .games-grid{
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.6rem;
+  }
+  .game-card{
+    display: flex; flex-direction: column;
+    border: 1px solid var(--line2); border-radius: var(--radius);
+    background: var(--panel); overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .game-card:hover{
+    transform: translateY(-5px);
+    border-color: var(--a1);
+    box-shadow: var(--card-shadow), 0 0 28px var(--line2);
+  }
+  .game-cover{
+    position: relative; height: 180px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .game-cover img{
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .4s;
+  }
+  .game-card:hover .game-cover img{ transform: scale(1.06); }
+  .game-cover .cover-emoji{
+    font-size: 3.4rem; letter-spacing: .4rem; line-height: 1;
+    filter: drop-shadow(0 0 14px var(--glow-a1));
+    animation: coverBounce 2.6s infinite ease-in-out;
+  }
+  @keyframes coverBounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .game-cover .cover-tag{
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    font-size: .66rem; letter-spacing: 1px; padding: .2rem .55rem;
+    border: 1px solid var(--a2); border-radius: 5px;
+    color: var(--a2); background: var(--panel);
+  }
+  .game-body{ display: flex; flex-direction: column; gap: .7rem; padding: 1.2rem 1.3rem 1.4rem; flex: 1; }
+  .game-name{ font-size: 1.15rem; font-weight: 700; color: var(--title); margin: 0; }
+  .game-desc{ font-size: .85rem; color: var(--dim); line-height: 1.8; margin: 0; flex: 1; }
+  .game-meta{ display: flex; gap: .5rem; flex-wrap: wrap; }
+  .game-meta span{
+    font-size: .68rem; padding: .18rem .55rem; letter-spacing: 1px;
+    border: 1px solid var(--line2); border-radius: 20px; color: var(--dim);
+  }
+  .game-play{
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    margin-top: .4rem; padding: .75rem 1rem;
+    border: 1px solid var(--a1); border-radius: var(--btn-radius);
+    background: var(--a1); color: #000; font-weight: 700; letter-spacing: 2px;
+    text-decoration: none; font-size: .9rem;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .game-play:hover{ transform: translateY(-2px); box-shadow: 0 0 18px var(--glow-a1); }
+
+  .games-footer-note{
+    margin-top: 2.4rem; text-align: center;
+    color: var(--dim); font-size: .78rem; letter-spacing: 1px;
+  }
+  .games-footer-note i{ color: var(--a1); font-style: normal; }
+
+  @media (max-width: 640px){
+    .games-wrap{ padding: 1rem .8rem 3rem; }
+    .games-title{ font-size: 1.3rem; }
+    .games-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="games-wrap">
+  <div class="games-topbar">
+    <a class="games-back" href="index.html">← 返回主页 // BACK</a>
+    <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换主题"></button>
+  </div>
+
+  <header class="games-header">
+    <h1 class="games-title">// GAME_ARCADE</h1>
+    <p class="games-sub">
+      欢迎来到我的游戏厅。这里的每一款都是<b>纯网页小游戏</b>，点开即玩，无需下载。<br>
+      目前上架 <b>2</b> 款，后续有新作会继续丢进来。
+    </p>
+  </header>
+
+  <div class="games-grid">
+    <!-- 逃离棍木 -->
+    <div class="game-card">
+      <div class="game-cover">
+        <span class="cover-tag">生存 · 无限增殖</span>
+        <img src="gunmu.png" alt="逃离棍木 · 无限增殖">
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">逃离棍木 · 无限增殖</h2>
+        <p class="game-desc">棍木来了，快跑！在无限增殖的棍木围追堵截中生存下去，看你能在增殖狂潮里撑多久。</p>
+        <div class="game-meta"><span>HTML5</span><span>动作</span><span>生存</span></div>
+        <a class="game-play" href="gunmu.html">开始游戏 <i class="fas fa-play"></i></a>
+      </div>
+    </div>
+
+    <!-- Emoji 八角笼 -->
+    <div class="game-card">
+      <div class="game-cover">
+        <span class="cover-tag">斗蛐蛐 · 观战</span>
+        <span class="cover-emoji">🐔⚔️🦆</span>
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">Emoji 八角笼 · 斗蛐蛐</h2>
+        <p class="game-desc">把 Emoji 关进八角笼，让它们自相残杀！押注你心中的王者，围观一场电子斗蛐蛐大赛。</p>
+        <div class="game-meta"><span>HTML5</span><span>模拟</span><span>对战</span></div>
+        <a class="game-play" href="emojis.html">开始游戏 <i class="fas fa-play"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <p class="games-footer-note">MORE GAMES COMING SOON <i>//</i> 有新点子就开工</p>
+</div>
+
+<script>
+/* 主题切换（与主页共享 codej-theme） */
+var THEMES = [
+  { id: 'modern', name: 'MODERN', icon: 'fa-feather' },
+  { id: 'star',   name: 'STAR',   icon: 'fa-star' },
+  { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' }
+];
+var gThemeBtn = document.getElementById('theme-toggle');
+function gCurrentTheme(){ return document.documentElement.dataset.theme || 'cyber'; }
+function gApplyTheme(id){
+  document.documentElement.dataset.theme = id;
+  try{ localStorage.setItem('codej-theme', id); }catch(e){}
+  var t = THEMES.find(function(x){ return x.id===id; });
+  if(gThemeBtn && t){
+    gThemeBtn.innerHTML = '<i class="fas ' + t.icon + '"></i> ' + t.name;
+    var next = THEMES[(THEMES.indexOf(t)+1) % THEMES.length];
+    gThemeBtn.title = '切换主题 → ' + next.name;
+  }
+}
+if(gThemeBtn){
+  gThemeBtn.addEventListener('click', function(){
+    var idx = THEMES.findIndex(function(t){ return t.id === gCurrentTheme(); });
+    gApplyTheme(THEMES[(idx+1) % THEMES.length].id);
+  });
+}
+gApplyTheme(gCurrentTheme());
+</script>
+</body>
+</html>
