@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>录像带 07-B</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;overflow:hidden;font-family:"Courier New",Courier,monospace;-webkit-font-smoothing:none}
+  #vhs{position:fixed;inset:0;background:#000;overflow:hidden;user-select:none}
+
+  #screen{
+    position:absolute;inset:0;
+    filter:blur(0.55px) contrast(1.18) saturate(0.62) brightness(0.9) sepia(0.08);
+    animation:jitter 4.1s infinite steps(1);
+    overflow:hidden;
+  }
+  @keyframes jitter{
+    0%,100%{transform:translate(0,0)}
+    9%{transform:translate(1px,-1px)}
+    17%{transform:translate(-1px,1px)}
+    29%{transform:translate(1px,1px)}
+    41%{transform:translate(-1px,0)}
+    56%{transform:translate(0,-1px)}
+    68%{transform:translate(1px,1px)}
+    81%{transform:translate(-1px,-1px)}
+    93%{transform:translate(1px,0)}
+  }
+  #screen.glitch{animation:glitchJump .09s infinite!important}
+  @keyframes glitchJump{
+    0%{transform:translate(0,0) skewX(0)}
+    20%{transform:translate(-10px,2px) skewX(2deg);filter:blur(2px) contrast(1.7) saturate(0.2)}
+    45%{transform:translate(7px,-4px) skewX(-2.5deg);filter:blur(0.8px) contrast(2) saturate(0.15)}
+    70%{transform:translate(-4px,1px) skewX(1.2deg);filter:blur(3px) contrast(1.4) saturate(0.45)}
+    100%{transform:translate(0,0) skewX(0)}
+  }
+
+  #bg{position:absolute;inset:0;background:#0b0b0b;transition:background .04s}
+  #bg.colorbar{
+    background:linear-gradient(90deg,
+      #b0b0b0 0 14.28%,#b0b000 14.28% 28.56%,#00b0b0 28.56% 42.84%,
+      #00b000 42.84% 57.12%,#b000b0 57.12% 71.4%,#b00000 71.4% 85.68%,#0000b0 85.68% 100%);
+  }
+  #bg.dark{background:#080706}
+  #bg.deep{background:#030303}
+  #bg.black{background:#000000}
+  #bg.blue{background:#0a1240}
+
+  #textLayer{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    text-align:center;
+    padding:0 7vw;
+    z-index:10;
+    color:#e4dfd2;
+    line-height:1.7;
+    letter-spacing:0.06em;
+    text-shadow:
+      1.8px 0 rgba(255,0,60,.42),
+     -1.8px 0 rgba(0,200,255,.36),
+      0 0 8px rgba(0,0,0,.9);
+  }
+  .slide{width:100%;display:none}
+  .slide.on{display:block}
+
+  .hint{font-size:clamp(12px,2.1vmin,20px);letter-spacing:.7em;color:#d4cfc2}
+  .kicker{font-size:clamp(13px,2.3vmin,24px);letter-spacing:.55em;color:#b3ada0}
+  .big{font-size:clamp(17px,3.9vmin,42px);font-weight:700;letter-spacing:.08em;margin-bottom:.45em}
+  .mid{font-size:clamp(14px,2.7vmin,28px);letter-spacing:.12em;line-height:1.9}
+  .small{font-size:clamp(11px,1.8vmin,18px);color:#bdb7aa;letter-spacing:.2em;margin-top:1.6em}
+
+  .figure-row{
+    display:flex;justify-content:center;align-items:flex-end;
+    gap:clamp(28px,8vw,100px);
+    margin:1.1em 0 .5em;
+  }
+  .figure-item{display:flex;flex-direction:column;align-items:center;gap:.65em}
+  .figure-item .label{
+    font-size:clamp(10px,1.7vmin,15px);
+    letter-spacing:.28em;
+    color:#b8b2a5;
+    border:1px solid rgba(210,205,190,.32);
+    padding:.35em .95em;
+    text-shadow:none;
+  }
+  .figure-item .label.bad{border-color:rgba(200,55,55,.55);color:#c46a6a}
+
+  .stick-svg{
+    width:clamp(76px,15vmin,140px);
+    height:auto;
+    filter:drop-shadow(0 0 4px rgba(0,0,0,.8));
+  }
+  .stick-svg .body-line{
+    stroke:#ddd8cb;
+    stroke-width:7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    fill:none;
+  }
+  .stick-svg .body-head{fill:#ddd8cb;stroke:none}
+  .stick-svg .eye{fill:#0b0b0b}
+  .stick-svg.bad .body-line{stroke:#b85a5a}
+  .stick-svg.bad .body-head{fill:#b85a5a}
+  .stick-svg.bad .eye{fill:#080706}
+  .stick-svg .mark{
+    stroke:#a02020;stroke-width:4.2;stroke-linecap:round;fill:none;
+  }
+  .stick-svg .mark-dot{fill:#8a1a1a}
+
+  .mirror-row{
+    display:flex;justify-content:center;align-items:center;
+    gap:clamp(18px,4vw,44px);
+    margin:1em 0 .4em;
+  }
+  .mirror-divider{
+    width:1px;height:clamp(80px,16vmin,150px);
+    background:linear-gradient(to bottom,transparent,rgba(200,200,190,.35),transparent);
+  }
+  .mirror-flip{transform:scaleX(-1)}
+
+  .quiz{
+    display:flex;justify-content:center;gap:clamp(16px,5vw,52px);
+    margin-top:1.3em;flex-wrap:wrap;
+  }
+  .option{
+    font-family:inherit;
+    font-size:clamp(11px,1.9vmin,18px);
+    letter-spacing:.18em;
+    padding:.7em 1.6em;
+    background:transparent;
+    border:1px solid rgba(210,205,190,.4);
+    color:#d0cabd;
+    cursor:pointer;
+    transition:none;
+    text-shadow:inherit;
+  }
+  .option:hover{background:rgba(210,205,190,.14);border-color:#d0cabd}
+  .option.wrong{border-color:#8a1a1a;color:#c85050;background:rgba(100,0,0,.15)}
+
+  .voice-wave{
+    display:flex;gap:clamp(3px,0.6vw,6px);
+    align-items:center;justify-content:center;
+    height:clamp(28px,6vmin,50px);
+    margin:1.1em 0 .3em;
+  }
+  .voice-wave span{
+    width:clamp(2px,0.4vw,4px);
+    height:100%;
+    background:linear-gradient(to top,rgba(184,90,90,.12),rgba(184,90,90,.85));
+    transform-origin:center;
+    animation:wavePulse .55s ease-in-out infinite ▄▄▄▄▄▄▄▄▄▄;
+  }
+  .voice-wave span:nth-child(3n){animation-delay:.15s}
+  .voice-wave span:nth-child(3n+1){animation-delay:.3s}
+  .voice-wave span:nth-child(4n){animation-duration:.4s}
+  .voice-wave span:nth-child(5n){animation-duration:.7s;animation-delay:.1s}
+  @keyframes wavePulse{
+    0%{transform:scaleY(.12);opacity:.3}
+    100%{transform:scaleY(1);opacity:.92}
+  }
+
+  #noise{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:20;opacity:.24;mix-blend-mode:screen;pointer-events:none}
+  .scanlines{
+    position:absolute;inset:-4px;z-index:21;pointer-events:none;
+    background:repeating-linear-gradient(to bottom,
+      rgba(0,0,0,.44) 0px,rgba(0,0,0,.44) 1px,
+      transparent 1px,transparent 3px);
+  }
+  .tracking{
+    position:absolute;left:0;right:0;height:11%;z-index:22;pointer-events:none;
+    background:linear-gradient(to bottom,transparent,rgba(255,255,255,.055) 45%,rgba(255,255,255,.015) 55%,transparent);
+    animation:trackMove 9s linear infinite;
+  }
+  @keyframes trackMove{from{top:108%}to{top:-18%}}
+  .vignette{
+    position:absolute;inset:0;z-index:23;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,transparent 34%,rgba(0,0,0,.86) 100%);
+    box-shadow:inset 0 0 18vmin rgba(0,0,0,.85);
+  }
+  .chroma{
+    position:absolute;inset:0;z-index:19;pointer-events:none;mix-blend-mode:screen;opacity:.16;
+    background:linear-gradient(90deg,rgba(255,0,0,.07),transparent 30%,transparent 70%,rgba(0,180,255,.07));
+  }
+
+  #osd{
+    position:absolute;top:4.5%;right:5%;z-index:40;pointer-events:none;
+    color:#eae6da;text-align:right;letter-spacing:.1em;
+    text-shadow:2px 2px 0 #000,0 0 6px #000;
+  }
+  #osdMode{font-size:clamp(13px,2.1vmin,22px);font-weight:700;margin-bottom:.2em}
+  #osdMode .rec{animation:blink 1.6s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  #osdTime{font-size:clamp(11px,1.7vmin,18px);opacity:.88}
+
+  #controls{
+    position:absolute;left:0;right:0;bottom:0;z-index:50;
+    padding:12px 16px;display:flex;align-items:center;gap:12px;
+    background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+    opacity:0;transition:opacity .4s;pointer-events:none;
+  }
+  #vhs:hover #controls{opacity:1;pointer-events:auto}
+  .vbtn{
+    width:38px;height:38px;border:1px solid rgba(255,255,255,.32);background:rgba(15,15,15,.7);
+    color:#ccc;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-family:inherit;transition:none;
+  }
+  .vbtn:hover{background:rgba(255,255,255,.15);color:#fff;border-color:#fff}
+  .vlabel{margin-left:auto;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.35)}
+
+  #boot{
+    position:absolute;inset:0;z-index:100;background:#050505;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 8vw;color:#807b6f;
+    cursor:pointer;transition:opacity .7s;
+  }
+  #boot.hide{opacity:0;pointer-events:none}
+  #boot .tape-mark{font-size:clamp(30px,8vmin,70px);letter-spacing:.1em;color:#1f1d19;margin-bottom:.6em}
+  #boot h1{font-size:clamp(16px,2.9vmin,30px);font-weight:500;color:#b0aa9d;letter-spacing:.38em;margin-bottom:.9em}
+  #boot .sub{font-size:clamp(10px,1.6vmin,15px);letter-spacing:.28em;color:#565248;margin-bottom:3em}
+  #playBtn{
+    font-family:inherit;font-size:clamp(12px,1.8vmin,17px);letter-spacing:.35em;
+    padding:14px 42px;color:#c0baac;background:transparent;border:1px solid #444036;
+    cursor:pointer;transition:all .3s;
+  }
+  #playBtn:hover{color:#080808;background:#c0baac;border-color:#c0baac}
+  #boot .foot{margin-top:3em;font-size:clamp(8px,1.3vmin,12px);letter-spacing:.3em;color:#35322c}
+
+  #cut{position:absolute;inset:0;background:#000;z-index:90;opacity:0;pointer-events:none;transition:none}
+  #cut.on{opacity:1}
+
+  #flash{position:absolute;inset:0;z-index:80;opacity:0;pointer-events:none;background:#000;display:flex;align-items:center;justify-content:center}
+  #flash.on{opacity:1}
+  #flash svg{width:66vmin;height:66vmin;filter:blur(1px) contrast(1.8)}
+</style>
+</head>
+<body>
+
+<div id="vhs">
+  <div id="screen">
+    <div id="bg" class="dark"></div>
+
+    <div id="textLayer">
+      <div class="slide on" data-slide="0">
+        <div class="hint"> 棍 木 县 警 局 · 内 部 训 练 资 料</div>
+        <div class="small" style="margin-top:2.2em;letter-spacing:.4em;color:#918c7f">请勿转录 · 请勿外传 · 编号 07-B</div>
+      </div>
+      <div class="slide" data-slide="1">
+        <div class="kicker">▄▄▄识别指南</div>
+        <div class="small">▄▄▄▄▄▄▄▄▄▄ IDENTIFICATION PROTOCOL</div>
+      </div>
+      <div class="slide" data-slide="2">
+        <div class="mid">你身边的人，可能已经不是原来那个人了。</div>
+        <div class="figure-row">
+          <div class="figure-item">
+            <svg class="stick-svg" viewBox="0 0 100 150">
+              <circle class="body-head" cx="50" cy="26" r="14"/>
+              <line class="body-line" x1="50" y1="40" x2="50" y2="88"/>
+              <line class="body-line" x1="50" y1="52" x2="28" y2="76"/>
+              <line class="body-line" x1="50" y1="52" x2="72" y2="76"/>
+              <line class="body-line" x1="50" y1="88" x2="34" y2="128"/>
+              <line class="body-line" x1="50" y1="88" x2="66" y2="128"/>
+            </svg>
+            <span class="label">人 类</span>
+          </div>
+          <div class="figure-item">
+            <svg class="stick-svg bad" viewBox="0 0 100 150">
+              <circle class="body-head" cx="50" cy="22" r="16"/>
+              <line class="body-line" x1="50" y1="38" x2="50" y2="92"/>
+              <line class="body-line" x1="50" y1="50" x2="20" y2="82"/>
+              <line class="body-line" x1="50" y1="50" x2="80" y2="82"/>
+              <line class="body-line" x1="50" y1="92" x2="28" y2="134"/>
+              <line class="body-line" x1="50" y1="92" x2="72" y2="134"/>
+              <circle class="eye" cx="43" cy="20" r="2.6"/>
+              <circle class="eye" cx="57" cy="20" r="2.6"/>
+              <circle class="mark-dot" cx="20" cy="82" r="3"/>
+              <circle class="mark-dot" cx="80" cy="82" r="3"/>
+            </svg>
+            <span class="label bad">▄▄▄▄▄▄▄▄▄▄▄▄▄▄</span>
+          </div>
+        </div>
+        <div class="small">注意面部比例、肢体长度与站姿的细微差异。</div>
+      </div>
+      <div class="slide" data-slide="3">
+        <div class="kicker">法 则 一</div>
+        <div class="mid" style="margin-top:.7em">观察其是否符合生物学特征。</div>
+        <div class="figure-row" style="margin-top:.9em">
+          <div class="figure-item">
+            <svg class="stick-svg bad" viewBox="0 0 100 160">
+              <circle class="body-head" cx="50" cy="24" r="15"/>
+              <line class="body-line" x1="50" y1="39" x2="50" y2="94"/>
+              <line class="body-line" x1="50" y1="52" x2="16" y2="98"/>
+              <line class="body-line" x1="50" y1="52" x2="84" y2="98"/>
+              <line class="body-line" x1="50" y1="94" x2="32" y2="146"/>
+              <line class="body-line" x1="50" y1="94" x2="68" y2="146"/>
+              <line class="mark" x1="12" y1="44" x2="30" y2="56"/>
+              <line class="mark" x1="70" y1="56" x2="88" y2="44"/>
+            </svg>
+            <span class="label bad">肢 体 比 例 异 常</span>
+          </div>
+        </div>
+        <div class="small">手臂过长、手指数量不对、关节反向弯曲。</div>
+      </div>
+      <div class="slide" data-slide="4">
+        <div class="small" style="letter-spacing:.62em;color:#4f4c44;margin-top:0">信 号 丢 失</div>
+        <div class="hint" style="margin-top:2em;color:#332f2a;letter-spacing:.9em">· · ·</div>
+        <div class="small" style="color:#2e2b26;letter-spacing:.34em">TAPE 07-B · SEGMENT MISSING</div>
+      </div>
+      <div class="slide" data-slide="5">
+        <div class="kicker">法 则 二</div>
+        <div class="mid" style="margin-top:.7em">如果这个人一直盯着你，超过三秒，不眨眼。</div>
+        <div class="small" style="margin-top:1.3em;color:#d0cabd">你该怎么做？</div>
+        <div class="quiz">
+          <button class="option" data-answer="wrong">上 前 询 问</button>
+          <button class="option" data-answer="right">移 开 视 线，离 开 房 间</button>
+          <button class="option" data-answer="wrong">继 续 对 视</button>
+        </div>
+      </div>
+      <div class="slide" data-slide="6">
+        <div class="kicker">法 则 三</div>
+        <div class="mid" style="margin-top:.7em">叫他们的名字。如果回答得太快——</div>
+        <div class="big" style="color:#c85050;margin-top:.5em">那不是他们。</div>
+        <div class="small">▄▄学习了你的声音，但它还没有学会犹豫。</div>
+      </div>
+      <div class="slide" data-slide="7">
+        <div class="kicker">法 则 四</div>
+        <div class="mid" style="margin-top:.7em">镜子里的人，永远比你慢半拍。</div>
+        <div class="mirror-row">
+          <div class="figure-item">
+            <svg class="stick-svg" viewBox="0 0 100 150">
+              <circle class="body-head" cx="50" cy="26" r="14"/>
+              <line class="body-line" x1="50" y1="40" x2="50" y2="88"/>
+              <line class="body-line" x1="50" y1="52" x2="28" y2="76"/>
+              <line class="body-line" x1="50" y1="52" x2="72" y2="76"/>
+              <line class="body-line" x1="50" y1="88" x2="34" y2="128"/>
+              <line class="body-line" x1="50" y1="88" x2="66" y2="128"/>
+            </svg>
+          </div>
+          <div class="mirror-divider"></div>
+          <div class="figure-item mirror-flip">
+            <svg class="stick-svg bad" viewBox="0 0 100 150">
+              <circle class="body-head" cx="50" cy="26" r="14"/>
+              <line class="body-line" x1="50" y1="40" x2="50" y2="88"/>
+              <line class="body-line" x1="50" y1="52" x2="24" y2="82"/>
+              <line class="body-line" x1="50" y1="52" x2="76" y2="70"/>
+              <line class="body-line" x1="50" y1="88" x2="34" y2="128"/>
+              <line class="body-line" x1="50" y1="88" x2="66" y2="128"/>
+              <circle class="eye" cx="44" cy="23" r="2.6"/>
+              <circle class="eye" cx="56" cy="23" r="2.6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="big" style="color:#c85050;margin-top:.2em">如果它先动了——不要回头。</div>
+        <div class="small">玻璃、水面、熄屏的手机，都算镜子。</div>
+      </div>
+      <div class="slide" data-slide="8">
+        <div class="kicker">案 例 档 案 · 07-B-3</div>
+        <div class="mid" style="margin-top:1.2em">“今晚来我家吧，我做了饭。”</div>
+        <div class="small">—— 来 自 M · ▄▄▄ 的 短 信<br>发 送 时 间：23:47</div>
+      </div>
+      <div class="slide" data-slide="9">
+        <div class="mid">门 没 锁。</div>
+        <div class="small" style="color:#96605a">灯 是 灭 的。</div>
+      </div>
+      <div class="slide" data-slide="10">
+        <div class="big" style="color:#c85050">有 什 么 东 西 在 厨 房 里。</div>
+        <div class="small">它 站 着，没 有 呼 吸。</div>
+      </div>
+      <div class="slide" data-slide="11">
+        <div class="mid">他 躲 进 了 卧 室。</div>
+        <div class="small">门 锁 上 了。</div>
+        <div class="small" style="color:#96605a;margin-top:1.4em">脚 步 声 停 在 了 门 外。</div>
+      </div>
+      <div class="slide" data-slide="12">
+        <div class="kicker">门 外 · 00:12</div>
+        <div class="mid" style="margin-top:1em">“你 开 门 啊。”</div>
+        <div class="voice-wave"></div>
+        <div class="small" style="color:#96605a">那 是 ▄▄▄ 的 声 音，但 语 调 不 太 对。</div>
+      </div>
+      <div class="slide" data-slide="13">
+        <div class="mid">“我 们 不 是 朋 友 吗？”</div>
+        <div class="voice-wave"></div>
+        <div class="small" style="color:#96605a">“你 总 是 这 样，把 自 己 关 起 来。”</div>
+      </div>
+      <div class="slide" data-slide="14">
+        <div class="mid">“我 数 到 十。”</div>
+        <div class="voice-wave"></div>
+        <div class="big" style="color:#c85050;margin-top:.5em">“一。”</div>
+      </div>
+      <div class="slide" data-slide="15">
+        <div class="mid">“二。”</div>
+        <div class="small">“三。”</div>
+        <div class="voice-wave"></div>
+        <div class="small" style="color:#96605a;margin-top:1.2em">声 音 是 从 门 缝 下 面 传 来 的。</div>
+      </div>
+      <div class="slide" data-slide="16">
+        <div class="mid" style="color:#d4cfc2">“你 的 朋 友 已 经 不 在 了。”</div>
+        <div class="small" style="color:#96605a">“但 我 可 以 是 他。”</div>
+      </div>
+      <div class="slide" data-slide="17">
+        <div class="hint" style="color:#332f2a;letter-spacing:.9em">· · ·</div>
+        <div class="small" style="color:#2e2b26;letter-spacing:.34em;margin-top:2em">SIGNAL LOST · 案 例 中 断</div>
+      </div>
+      <div class="slide" data-slide="18">
+        <div class="kicker">官 方 应 对 原 则</div>
+        <div class="mid" style="margin-top:.9em;line-height:2.1">
+          T — 报告你的情况<br>
+          H — 拖延▄▄的行动<br>
+          I — 分辨▄▄的类型<br>
+          N — 击杀▄▄（如安全）<br>
+          <span style="color:#c85050">K — ？ ？ ？</span>
+        </div>
+        <div class="small">（信号干扰……）</div>
+      </div>
+      <div class="slide" data-slide="19">
+        <div class="kicker">录 像 带 损 坏</div>
+        <div class="mid" style="margin-top:1em;color:#c46a6a">
+          K — KILL YOURSELF<br>
+          <span style="font-size:.7em;letter-spacing:.2em">这里容不下你们两个。</span>
+        </div>
+        <div class="small" style="margin-top:1.4em">K — KNOW YOUR PLACE IN REALITY</div>
+        <div class="small" style="color:#96605a">相信你自己的存〱ꏦꢜ..?在。</div>
+      </div>
+      <div class="slide" data-slide="20">
+        <div class="mid" style="color:#d4cfc2">……</div>
+        <div class="big" style="margin-top:.6em;color:#b03030">:)</div>
+      </div>
+      <div class="slide" data-slide="21">
+        <div class="mid" style="color:#68625a">录像带结束</div>
+        <div class="small">请将录像带交还指定人员。</div>
+        <div class="small" style="color:#3d3a34;letter-spacing:.3em">C.N.M.B. · 07-B · 观看后请勿与他人讨论</div>
+      </div>
+    </div>
+    <canvas id="noise"></canvas>
+    <div class="chroma"></div>
+    <div class="scanlines"></div>
+    <div class="tracking"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div id="osd">
+    <div id="osdMode"><span class="rec">▶</span> PLAY <span style="opacity:.5">SP</span></div>
+    <div id="osdTime">00:00:00:00</div>
+  </div>
+
+  <div id="controls">
+    <button class="vbtn" id="btnPlay" title="播放/暂停">⏸</button>
+    <button class="vbtn" id="btnFF" title="快进">⏩</button>
+    <button class="vbtn" id="btnRew" title="重放">⟲</button>
+    <button class="vbtn" id="btnMute" title="静音">🔊</button>
+    <span class="vlabel">TAPE 07-B · N.C.E.C. · DO NOT COPY</span>
+  </div>
+
+  <div id="cut"></div>
+
+  <div id="flash">
+    <svg viewBox="0 0 200 260">
+      <circle cx="100" cy="40" r="30" fill="none" stroke="#a02020" stroke-width="6"/>
+      <line x1="100" y1="70" x2="100" y2="170" stroke="#a02020" stroke-width="6"/>
+      <line x1="100" y1="95" x2="40" y2="150" stroke="#a02020" stroke-width="6"/>
+      <line x1="100" y1="95" x2="160" y2="150" stroke="#a02020" stroke-width="6"/>
+      <line x1="100" y1="170" x2="60" y2="245" stroke="#a02020" stroke-width="6"/>
+      <line x1="100" y1="170" x2="140" y2="245" stroke="#a02020" stroke-width="6"/>
+      <circle cx="88" cy="36" r="6" fill="#8a0000"/>
+      <circle cx="112" cy="36" r="6" fill="#8a0000"/>
+    </svg>
+  </div>
+
+  <div id="boot">
+    <div class="tape-mark">▮▮▮▮</div>
+    <h1>▄▄▄▄▄ 识 别 指 南</h1>
+    <div class="sub">棍木县警局 · 内部训练录像 · 07-B</div>
+    <button id="playBtn">插 入 录 像 带</button>
+    <div class="foot">仅限指定人员观看 · 观看后请勿与他人讨论内容</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const TIMELINE = [
+    { slide:0,  dur:6.0,  bg:'colorbar', fx:'beep' },
+    { slide:1,  dur:4.5,  bg:'blue',     fx:null },
+    { slide:2,  dur:7.0,  bg:'dark',     fx:'cut' },
+    { slide:3,  dur:7.5,  bg:'dark',     fx:null },
+    { slide:4,  dur:3.5,  bg:'black',    fx:'tapeGap' },
+    { slide:5,  dur:9.0,  bg:'dark',     fx:null, quiz:true },
+    { slide:6,  dur:6.5,  bg:'dark',     fx:'glitchSoft' },
+    { slide:7,  dur:7.5,  bg:'dark',     fx:null },
+    { slide:8,  dur:8.0,  bg:'deep',     fx:'smsPing' },
+    { slide:9,  dur:7.0,  bg:'deep',     fx:'cut' },
+    { slide:10, dur:8.0,  bg:'deep',     fx:'glitchSoft' },
+    { slide:11, dur:7.0,  bg:'deep',     fx:'lockClick' },
+    { slide:12, dur:11.0, bg:'black',    fx:'voice1' },
+    { slide:13, dur:12.0, bg:'black',    fx:'voice2' },
+    { slide:14, dur:12.0, bg:'black',    fx:'voice3' },
+    { slide:15, dur:12.0, bg:'black',    fx:'voice4' },
+    { slide:16, dur:10.0, bg:'deep',     fx:'voice5' },
+    { slide:17, dur:5.0,  bg:'black',    fx:'tapeGap' },
+    { slide:18, dur:7.5,  bg:'dark',     fx:null },
+    { slide:19, dur:8.5,  bg:'deep',     fx:'glitchHard' },
+    { slide:20, dur:6.0,  bg:'deep',     fx:'flashStick' },
+    { slide:21, dur:7.5,  bg:'black',    fx:'end' }
+  ];
+  const vhs      = document.getElementById('vhs');
+  const screenEl = document.getElementById('screen');
+  const bg       = document.getElementById('bg');
+  const slides   = Array.from(document.querySelectorAll('.slide'));
+  const noiseCv  = document.getElementById('noise');
+  const osdMode  = document.getElementById('osdMode');
+  const osdTime  = document.getElementById('osdTime');
+  const boot     = document.getElementById('boot');
+  const playBtn  = document.getElementById('playBtn');
+  const btnPlay  = document.getElementById('btnPlay');
+  const btnFF    = document.getElementById('btnFF');
+  const btnRew   = document.getElementById('btnRew');
+  const btnMute  = document.getElementById('btnMute');
+  const cutEl    = document.getElementById('cut');
+  const flashEl  = document.getElementById('flash');
+
+  const NW=160, NH=90;
+  noiseCv.width=NW; noiseCv.height=NH;
+  const nctx=noiseCv.getContext('2d');
+  const nImg=nctx.createImageData(NW,NH);
+  const nData=nImg.data;
+  let nTick=0;
+
+  function drawNoise(){
+    nTick++;
+    if(nTick%2!==0) return;
+    for(let i=0;i<nData.length;i+=4){
+      const v=Math.random()*255;
+      nData[i]=v; nData[i+1]=v*0.94; nData[i+2]=v*0.82;
+      nData[i+3]=Math.random()*120;
+    }
+    nctx.putImageData(nImg,0,0);
+  }
+  const A = {
+    ctx:null, master:null, muted:false, started:false,
+    init(){
+      if(this.started) return;
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return;
+      this.ctx=new AC();
+      this.master=this.ctx.createGain();
+      this.master.gain.value=0.5;
+      this.master.connect(this.ctx.destination);
+      this.started=true;
+
+      const len=this.ctx.sampleRate*2;
+      const buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+      const ch=buf.getChannelData(0);
+      for(let i=0;i<len;i++) ch[i]=(Math.random()*2-1)*0.55;
+      const src=this.ctx.createBufferSource();
+      src.buffer=buf; src.loop=true;
+      const hp=this.ctx.createBiquadFilter();
+      hp.type='highpass'; hp.frequency.value=1100;
+      const g=this.ctx.createGain(); g.gain.value=0.02;
+      src.connect(hp); hp.connect(g); g.connect(this.master);
+      src.start();
+
+      const osc=this.ctx.createOscillator();
+      const og=this.ctx.createGain();
+      osc.type='sine'; osc.frequency.value=46;
+      og.gain.value=0.016;
+      osc.connect(og); og.connect(this.master); osc.start();
+    },
+    beep(f,d){
+      if(!this.ctx||this.muted) return;
+      const c=this.ctx, o=c.createOscillator(), g=c.createGain();
+      o.type='square'; o.frequency.value=f||980;
+      g.gain.value=0.025;
+      o.connect(g); g.connect(this.master);
+      const t=c.currentTime;
+      o.start(t);
+      g.gain.setValueAtTime(0.025,t);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+(d||0.45));
+      o.stop(t+(d||0.45)+0.05);
+    },
+    burst(d,bright){
+      if(!this.ctx||this.muted) return;
+      const c=this.ctx;
+      const len=Math.max(0.06,d||0.18);
+      const buf=c.createBuffer(1,Math.floor(c.sampleRate*len),c.sampleRate);
+      const dd=buf.getChannelData(0);
+      for(let i=0;i<dd.length;i++) dd[i]=(Math.random()*2-1)*Math.pow(1-i/dd.length,2.2);
+      const s=c.createBufferSource(); s.buffer=buf;
+      const bp=c.createBiquadFilter(); bp.type='bandpass';
+      bp.frequency.value=450+(bright||1)*900; bp.Q.value=1.2;
+      const g=c.createGain(); g.gain.value=0.12;
+      s.connect(bp); bp.connect(g); g.connect(this.master);
+      s.start();
+    },
+    lowSwell(d){
+      if(!this.ctx||this.muted) return;
+      const c=this.ctx, o=c.createOscillator(), g=c.createGain();
+      o.type='sine'; o.frequency.value=33;
+      g.gain.value=0.0001;
+      o.connect(g); g.connect(this.master);
+      const t=c.currentTime;
+      o.start(t);
+      g.gain.exponentialRampToValueAtTime(0.085,t+0.3);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+(d||1.5));
+      o.stop(t+(d||1.5)+0.1);
+    },
+    toggleMute(){
+      if(!this.ctx) return this.muted;
+      this.muted=!this.muted;
+      this.master.gain.setValueAtTime(this.muted?0.0001:0.5,this.ctx.currentTime);
+      return this.muted;
+    }
+  };
+
+  const Voice = {
+    formants: [
+      [730, 1090, 2440], // a
+      [270, 2290, 3010], // i
+      [300,  870, 2240], // u
+      [530, 1840, 2480], // e
+      [570,  840, 2410], // o
+      [660, 1720, 2410]  // ae
+    ],
+
+    /**
+     * @returns {number}
+     */
+    speak(ctx, dest, count, opts){
+      if(!ctx) return 0;
+      const basePitch = opts.pitch || 110;
+      const jitter    = opts.jitter || 0.02;
+      let t = ctx.currentTime + 0.08;
+      const start = t;
+      for(let i=0;i<count;i++){
+        const dur = (opts.syllableDur || 0.13) * (0.7 + Math.random()*0.6);
+        this.syllable(ctx, dest, t, dur, basePitch, jitter, opts);
+        t += dur;
+        
+        t += Math.random() < 0.22 ? 0.22 : 0.03;
+      }
+      return t - start;
+    },
+
+    syllable(ctx, dest, t, dur, basePitch, jitter, opts){
+      const vowel = this.formants[Math.floor(Math.random()*this.formants.length)];
+      const shift = opts.formantShift || 1;
+      const osc = ctx.createOscillator();
+      osc.type = opts.wave || 'sawtooth';
+      const p0 = basePitch * (1 + (Math.random()-0.5)*jitter);
+      const p1 = basePitch * 1.12 * (1 + (Math.random()-0.5)*jitter);
+      const p2 = basePitch * 0.90 * (1 + (Math.random()-0.5)*jitter);
+      osc.frequency.setValueAtTime(p0, t);
+      osc.frequency.linearRampToValueAtTime(p1, t + dur*0.4);
+      osc.frequency.linearRampToValueAtTime(p2, t + dur);
+      const sum = ctx.createGain();
+      sum.gain.value = 1.8;
+      const filters = [];
+      [vowel[0]*shift, vowel[1]*shift, vowel[2]*shift].forEach((f,i)=>{
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = f;
+        bp.Q.value = 12 - i*3;
+        osc.connect(bp);
+        bp.connect(sum);
+        filters.push(bp);
+      });
+      const env = ctx.createGain();
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(0.32, t + 0.015);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      let node = sum;
+      if(opts.distortion){
+        const ws = ctx.createWaveShaper();
+        ws.curve = this.makeCurve(opts.distortion);
+        ws.oversample = '2x';
+        node.connect(ws);
+        node = ws;
+      }
+      if(opts.ringMod){
+        const ring = ctx.createGain();
+        ring.gain.value = 0.5;
+        const ro = ctx.createOscillator();
+        ro.type = 'sine';
+        ro.frequency.value = opts.ringMod;
+        const rg = ctx.createGain();
+        rg.gain.value = 0.5;
+        ro.connect(rg);
+        rg.connect(ring.gain);
+        node.connect(ring);
+        node = ring;
+        ro.start(t);
+        ro.stop(t + dur + 0.02);
+      }
+      node.connect(env);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = opts.lowpass || 1800;
+      lp.Q.value = 0.8;
+      env.connect(lp);
+      lp.connect(dest);
+      osc.start(t);
+      osc.stop(t + dur + 0.05);
+    },
+    makeCurve(amount){
+      const n = 8192;
+      const curve = new Float32Array(n);
+      const deg = Math.PI/180;
+      for(let i=0;i<n;i++){
+        const x = (i*2)/n - 1;
+        curve[i] = ((3+amount)*x*20*deg)/(Math.PI + amount*Math.abs(x));
+      }
+      return curve;
+    },
+    throughDoor(ctx, dest){
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 850;
+      lp.Q.value = 1.2;
+
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 0.012;
+      const fb = ctx.createGain();
+      fb.gain.value = 0.22;
+      lp.connect(delay);
+      delay.connect(fb);
+      fb.connect(delay);
+
+      const out = ctx.createGain();
+      out.gain.value = 0.8;
+      lp.connect(out);
+      delay.connect(out);
+      out.connect(dest);
+      return lp;
+    },
+
+    roomMuffled(ctx, dest){
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 500;
+      lp.Q.value = 0.7;
+      const g = ctx.createGain();
+      g.gain.value = 0.9;
+      lp.connect(g);
+      g.connect(dest);
+      return lp;
+    }
+  };
+  const VP = {
+    friend:   { pitch:128, jitter:0.02, formantShift:1.00, lowpass:2000, syllableDur:0.12 },
+    alt1:     { pitch: 78, jitter:0.15, formantShift:0.85, lowpass:1400, distortion:18, ringMod:53, syllableDur:0.16 },
+    alt2:     { pitch: 62, jitter:0.22, formantShift:0.78, lowpass:1000, distortion:35, ringMod:37, syllableDur:0.18 },
+    alt3:     { pitch: 55, jitter:0.30, formantShift:0.70, lowpass: 800, distortion:50, ringMod:29, syllableDur:0.20 }
+  };
+
+  const FX = {
+    beep(){
+      A.beep(980,0.55);
+      setTimeout(()=>A.beep(980,0.55),1600);
+      setTimeout(()=>A.beep(980,1.6),3200);
+    },
+    cut(){
+      A.burst(0.2,0.5);
+      cutEl.classList.add('on');
+      setTimeout(()=>cutEl.classList.remove('on'),70);
+    },
+    tapeGap(){
+      A.burst(0.5,0.3);
+      A.lowSwell(1.2);
+      screenEl.classList.add('glitch');
+      setTimeout(()=>screenEl.classList.remove('glitch'),240);
+      setTimeout(()=>{
+        cutEl.classList.add('on');
+        setTimeout(()=>cutEl.classList.remove('on'),110);
+      },600);
+    },
+    glitchSoft(){
+      A.burst(0.12,1.0);
+      screenEl.classList.add('glitch');
+      setTimeout(()=>screenEl.classList.remove('glitch'),380);
+    },
+    glitchHard(){
+      A.burst(0.4,2.2); A.lowSwell(1.8);
+      screenEl.classList.add('glitch');
+      setTimeout(()=>screenEl.classList.remove('glitch'),1000);
+      setTimeout(()=>{
+        cutEl.classList.add('on');
+        setTimeout(()=>cutEl.classList.remove('on'),50);
+      },420);
+      setTimeout(()=>{
+        cutEl.classList.add('on');
+        setTimeout(()=>cutEl.classList.remove('on'),90);
+      },900);
+    },
+    flashStick(){
+      A.burst(0.25,2.6); A.lowSwell(1.2);
+      flashEl.classList.add('on');
+      setTimeout(()=>flashEl.classList.remove('on'),140);
+      setTimeout(()=>{
+        flashEl.classList.add('on');
+        setTimeout(()=>flashEl.classList.remove('on'),80);
+      },420);
+    },
+    end(){
+      A.lowSwell(2.5);
+      screenEl.style.animation='none';
+      screenEl.offsetHeight;
+      screenEl.style.animation='';
+    },
+
+
+    smsPing(){
+      A.beep(1400,0.12);
+      setTimeout(()=>A.beep(1400,0.12),180);
+      setTimeout(()=>A.beep(1800,0.08),360);
+    },
+
+    lockClick(){
+      A.burst(0.12,0.3);
+      A.beep(220,0.06);
+    },
+    voice1(){
+      if(!A.ctx || A.muted) return;
+      for(let i=0;i<3;i++){
+        setTimeout(()=>{
+          A.burst(0.18,0.15);
+          A.beep(70,0.1);
+        }, i*420);
+      }
+      setTimeout(()=>{
+        if(!A.ctx) return;
+        const dest = Voice.throughDoor(A.ctx, A.master);
+        Voice.speak(A.ctx, dest, 4, VP.friend);
+      }, 2000);
+    },
+
+    voice2(){
+      if(!A.ctx || A.muted) return;
+      const dest = Voice.roomMuffled(A.ctx, A.master);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 5, VP.alt1), 300);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 4, VP.alt2), 3400);
+    },
+
+    voice3(){
+      if(!A.ctx || A.muted) return;
+      const dest = Voice.roomMuffled(A.ctx, A.master);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 3, VP.alt2), 200);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 1, VP.alt3), 2600);
+    },
+
+    voice4(){
+      if(!A.ctx || A.muted) return;
+      const dest = Voice.roomMuffled(A.ctx, A.master);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 1, VP.alt3), 200);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 1, VP.alt2), 1600);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 3, VP.alt1), 3200);
+    },
+
+    voice5(){
+      if(!A.ctx || A.muted) return;
+      const dest = Voice.roomMuffled(A.ctx, A.master);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 6, VP.alt1), 300);
+      setTimeout(()=>Voice.speak(A.ctx, dest, 4, VP.alt3), 4600);
+    }
+  };
+
+  let playing=false, elapsed=0, lastT=0;
+  let segIdx=0, segElapsed=0, waitingQuiz=false;
+
+  function pad(n){ return n<10?'0'+n:''+n; }
+  function updateOSD(){
+    const h=Math.floor(elapsed/3600), m=Math.floor((elapsed%3600)/60),
+          s=Math.floor(elapsed%60), f=Math.floor((elapsed%1)*30);
+    osdTime.textContent=pad(h)+':'+pad(m)+':'+pad(s)+':'+pad(f);
+  }
+  function setMode(){
+    osdMode.innerHTML = playing
+      ? '<span class="rec">▶</span> PLAY <span style="opacity:.5">SP</span>'
+      : '<span class="rec">❚❚</span> PAUSE <span style="opacity:.5">SP</span>';
+  }
+
+  function showSlide(idx){
+    slides.forEach(s=>s.classList.remove('on'));
+    if(slides[idx]) slides[idx].classList.add('on');
+    const seg=TIMELINE[idx];
+    if(seg && seg.bg) bg.className=seg.bg;
+    if(seg && seg.fx && FX[seg.fx]) FX[seg.fx]();
+  }
+
+  function goNext(){
+    if(segIdx>=TIMELINE.length-1){
+      playing=false; setMode(); return;
+    }
+    segIdx++;
+    segElapsed=0;
+    const seg=TIMELINE[segIdx];
+    showSlide(seg.slide);
+    waitingQuiz=!!seg.quiz;
+    if(waitingQuiz){
+      playing=false; setMode();
+    }
+  }
+
+  function tick(now){
+    if(playing){
+      if(!lastT) lastT=now;
+      const dt=Math.min(0.1,(now-lastT)/1000);
+      lastT=now;
+      elapsed+=dt; segElapsed+=dt;
+      updateOSD();
+
+      if(!waitingQuiz){
+        const seg=TIMELINE[segIdx];
+        if(segElapsed>=seg.dur) goNext();
+      }
+    } else { lastT=0; }
+    drawNoise();
+    requestAnimationFrame(tick);
+  }
+  document.querySelectorAll('.option').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const ans=this.dataset.answer;
+      if(ans==='wrong'){
+        this.classList.add('wrong');
+        A.burst(0.25,0.6);
+        screenEl.classList.add('glitch');
+        setTimeout(()=>screenEl.classList.remove('glitch'),260);
+        flashEl.classList.add('on');
+        setTimeout(()=>flashEl.classList.remove('on'),100);
+        return;
+      }
+      A.beep(1200,0.2);
+      this.classList.remove('wrong');
+      const slideEl=slides[5];      // 法则二 + 问答
+      if(!slideEl.dataset.feedback){
+        slideEl.dataset.feedback='1';
+        slideEl.innerHTML += '<div class="small" style="color:#8a857a;margin-top:1.4em">正确。不要相信它。</div>';
+      }
+      waitingQuiz=false;
+      playing=true;
+      lastT=0;
+      setMode();
+      setTimeout(()=>{ goNext(); },400);
+    });
+  });
+  function startPlayback(){
+    A.init();
+    boot.classList.add('hide');
+    cutEl.classList.add('on');
+    setTimeout(()=>cutEl.classList.remove('on'),120);
+
+    segIdx=0; segElapsed=0; elapsed=0; waitingQuiz=false;
+    showSlide(0);
+    playing=true; lastT=0; setMode();
+    requestAnimationFrame(tick);
+  }
+  playBtn.addEventListener('click',startPlayback);
+
+  btnPlay.addEventListener('click',()=>{
+    if(!A.started){ A.init(); }
+    playing=!playing; lastT=0; setMode();
+    if(playing){ A.beep(1000,0.08); } else { A.burst(0.08,0.5); }
+  });
+
+  btnFF.addEventListener('click',()=>{
+    if(!A.started) return;
+    A.burst(0.12,1.4);
+    if(segIdx<TIMELINE.length-1){
+      goNext();
+    }
+  });
+
+  btnRew.addEventListener('click',()=>{
+    elapsed=0; segIdx=0; segElapsed=0; waitingQuiz=false;
+    bg.className='colorbar';
+    cutEl.classList.add('on');
+    A.burst(0.3,0.8);
+    setTimeout(()=>{
+      cutEl.classList.remove('on');
+      showSlide(0);
+      playing=true; lastT=0; setMode(); updateOSD();
+    },260);
+  });
+
+  btnMute.addEventListener('click',()=>{
+    if(!A.started) A.init();
+    const m=A.toggleMute();
+    btnMute.textContent=m?'🔇':'🔊';
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(e.code==='Space'){ e.preventDefault(); if(!A.started) startPlayback(); else btnPlay.click(); }
+    if(e.code==='ArrowRight'){ btnFF.click(); }
+    if(e.code==='KeyM'){ btnMute.click(); }
+  });
+  document.querySelectorAll('.voice-wave').forEach(el=>{
+    if(el.children.length) return;
+    const n = 18;
+    for(let i=0;i<n;i++){
+      el.appendChild(document.createElement('span'));
+    }
+  });
+
+  updateOSD(); setMode();
+  requestAnimationFrame(function bootNoise(){
+    drawNoise();
+    requestAnimationFrame(bootNoise);
+  });
+
+})();
+</script>
+</body>
+</html>
