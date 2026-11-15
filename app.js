@@ -451,4 +451,23 @@
       vias.forEach(function (p) { p.style.opacity = ''; });
     });
   }
+
+  /* ================= 移动端折叠导航 ================= */
+  var navHeader = document.querySelector('.nav');
+  var navToggle = document.getElementById('nav-toggle');
+  if (navHeader && navToggle) {
+    function setNavOpen(open) {
+      navHeader.classList.toggle('nav-open', open);
+      navToggle.setAttribute('aria-expanded', String(open));
+      navToggle.setAttribute('aria-label', open ? '收起菜单' : '展开菜单');
+      navToggle.innerHTML = open ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
+    }
+    navToggle.addEventListener('click', function () {
+      setNavOpen(!navHeader.classList.contains('nav-open'));
+    });
+    // 点击任意导航链接后自动收起
+    navHeader.querySelectorAll('.nav-links a').forEach(function (a) {
+      a.addEventListener('click', function () { setNavOpen(false); });
+    });
+  }
 })();

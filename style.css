@@ -1374,6 +1374,46 @@ footer .flicker-word { color: var(--a2); animation: word-flicker 5s infinite; }
   #circuit { max-width: 360px; }
 }
 
+/* ---------- 移动端折叠导航 ---------- */
+.nav-toggle {
+  display: none;
+  background: var(--panel2);
+  border: 1px solid var(--line2);
+  color: var(--a1);
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nav-toggle:hover { border-color: var(--a1); box-shadow: 0 0 12px var(--line2); }
+
+@media (max-width: 760px) {
+  .nav { flex-wrap: wrap; gap: 0.6rem; padding: 0.6rem 1rem; }
+  .nav-toggle { display: block; margin-left: auto; }
+  .nav-links {
+    display: none;
+    order: 5;
+    width: 100%;
+    margin-left: 0;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+  }
+  .nav.nav-open .nav-links { display: flex; }
+  .nav-links a {
+    display: block;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+    border-color: var(--line);
+    border-radius: var(--btn-radius);
+    background: var(--panel);
+  }
+  .sys-status { display: none; }
+}
+
 @media (max-width: 640px) {
   .nav { padding: 0.6rem 1rem; }
   .sys-status { display: none; }
