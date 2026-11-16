@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T14:19:08.864Z",
+  "updated_at": "2026-11-16T04:23:05.876Z",
   "user": {
     "login": "CodeJ-40404",
     "repos": 9,
@@ -14,15 +14,15 @@
   "langs": [
     {
       "name": "C++",
-      "pct": 69.4
+      "pct": 67.3
     },
     {
       "name": "HTML",
-      "pct": 24.5
+      "pct": 26.8
     },
     {
       "name": "Python",
-      "pct": 2.2
+      "pct": 2.1
     },
     {
       "name": "CSS",
@@ -30,7 +30,7 @@
     },
     {
       "name": "JavaScript",
-      "pct": 1.8
+      "pct": 1.7
     },
     {
       "name": "C",
