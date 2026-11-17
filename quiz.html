@@ -148,7 +148,7 @@
   <header class="quiz-header">
     <h1 class="quiz-title">// 关于我，你知道多少？</h1>
     <p class="quiz-sub">
-      一共 <b>24</b> 题，分两个难度。每题答完即时反馈，<b>放水版</b>10题 + <b>地狱版</b>14题（含填空/简答）。<br>
+      一共 <b>25</b> 题，分两个难度。每题答完即时反馈，<b>放水版</b>10题 + <b>地狱版</b>15题（含填空/简答）。<br>
       计分：多选全对 1 分，部分对 0.5 分，有错选 0 分；简答/填空合理即 1 分。<br>
       15 分 = 很了解这只猴子 · 20 分 = 很熟悉 · 25 分 = 你看答案了吧 <b>(doge)</b>
     </p>
@@ -193,7 +193,7 @@ const QUIZ = {
     { t:'我有什么平台的账号', type:'multi', opts:['微信','抖音','QQ','GitHub','GitLab','Stack Overflow','Steam','X','Telegram','Instagram','YouTube','Reddit','CSDN','企业微信'], ans:['A','B','C','D','M'] },
     { t:'我讨厌什么', type:'multi', opts:['蜘蛛蜈蚣蚰蜒毛毛虫爬虫蠕虫','吃辣的东西','考砸','大家都话痨','大家都潜水','冬天','夏天'], ans:['A','C','E'] },
     { t:'（防满分）填空题：我得知成绩时一般是什么反应', type:'fill', ans:['手抵','嘴边','瞳孔放大','震惊','啊','我靠'], ansText:'手抵在嘴边然后瞳孔放大非常震惊，然后统一的"啊？"和"我靠"（无论好坏）' },
-    { t:'开放题：我整个人对于不同领域的兴趣都是什么样的', type:'short', ans:'对于计算机、科学最感兴趣；文科兴趣一般；英语擅长但本身不感兴趣；对国外文化比较感兴趣但有限；体育兴趣一般，最擅长400m。（不为空即给分）' }
+    { t:'开放题：你对我有什么评价', type:'short', ans:'（不为空即给分）' }
   ]
 };
 
@@ -394,7 +394,9 @@ function renderFinal(){
 var THEMES = [
   { id: 'modern', name: 'MODERN', icon: 'fa-feather' },
   { id: 'star',   name: 'STAR',   icon: 'fa-star' },
-  { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' }
+  { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' },
+  { id: 'glass',  name: 'GLASS',  icon: 'fa-droplet' },
+  { id: 'pixel',  name: '8BIT',   icon: 'fa-terminal' }
 ];
 var qThemeBtn = document.getElementById('theme-toggle');
 function qCurrentTheme(){ return document.documentElement.dataset.theme || 'cyber'; }

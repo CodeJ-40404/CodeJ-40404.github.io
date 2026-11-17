@@ -12,7 +12,9 @@
   var THEMES = [
     { id: 'modern', name: 'MODERN', icon: 'fa-feather' },
     { id: 'star',   name: 'STAR',   icon: 'fa-star' },
-    { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' }
+    { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' },
+    { id: 'glass',  name: 'GLASS',  icon: 'fa-droplet' },
+    { id: 'pixel',  name: '8BIT',   icon: 'fa-terminal' }
   ];
   var themeBtn = document.getElementById('theme-toggle');
 
@@ -48,9 +50,11 @@
     var TRAIL_COLORS = {
       cyber: ['#00f0ff', '#ff2a6d', '#00f0ff'],
       star: ['#b388ff', '#ffffff', '#82b1ff'],
-      modern: ['#4f6ef7']
+      modern: ['#4f6ef7'],
+      glass: ['#2f7cf6', '#a855f7', '#7dd3fc'],
+      pixel: ['#33ff66', '#ffb000', '#33ff66']
     };
-    var TRAIL_SIZE = { cyber: 2.6, star: 2.2, modern: 1.6 };
+    var TRAIL_SIZE = { cyber: 2.6, star: 2.2, modern: 1.6, glass: 2.0, pixel: 2.4 };
 
     var parts = [];
     var lx = -1, ly = -1;
@@ -470,4 +474,104 @@
       a.addEventListener('click', function () { setNavOpen(false); });
     });
   }
+
+  /* ================= 生日彩蛋（每年 3 月 9 日） ================= */
+  (function birthdayEgg() {
+    var now = new Date();
+    if (now.getMonth() !== 2 || now.getDate() !== 9) return;
+    try {
+      if (sessionStorage.getItem('codej-bday-seen')) return;
+      sessionStorage.setItem('codej-bday-seen', '1');
+    } catch (e) {}
+
+    function start() {
+      if (!document.body) return;
+
+      var canvas = document.createElement('canvas');
+      canvas.id = 'bday-canvas';
+      document.body.appendChild(canvas);
+
+      var card = document.createElement('div');
+      card.className = 'bday-card';
+      card.innerHTML =
+        '<div class="bday-cake">🎂</div>' +
+        '<div class="bday-kicker">SYSTEM NOTICE // 03 · 09</div>' +
+        '<h2 class="bday-title">HAPPY BIRTHDAY</h2>' +
+        '<p class="bday-sub">CodeJ-40404<br>今天不写 bug，只吃蛋糕。</p>' +
+        '<button class="bday-close" type="button">收下祝福 ✕</button>';
+      document.body.appendChild(card);
+
+      var ctx = canvas.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var W = 0, H = 0;
+
+      function resize() {
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      var cs = getComputedStyle(document.documentElement);
+      var palette = ['--a1', '--a2', '--a3'].map(function (k) {
+        return cs.getPropertyValue(k).trim() || '#ff2a6d';
+      }).concat(['#ffe066', '#ffffff']);
+
+      var parts = [];
+      for (var i = 0; i < 140; i++) {
+        parts.push({
+          x: Math.random() * W,
+          y: Math.random() * -H,
+          w: 4 + Math.random() * 6,
+          h: 8 + Math.random() * 8,
+          vy: 70 + Math.random() * 130,
+          vx: -30 + Math.random() * 60,
+          rot: Math.random() * Math.PI,
+          vr: -2.5 + Math.random() * 5,
+          color: palette[(Math.random() * palette.length) | 0]
+        });
+      }
+
+      var last = 0, raf = 0, running = true;
+      function frame(t) {
+        if (!running) return;
+        if (!last) last = t;
+        var dt = Math.min((t - last) / 1000, 0.05);
+        last = t;
+        ctx.clearRect(0, 0, W, H);
+        parts.forEach(function (p) {
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.rot += p.vr * dt;
+          if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        raf = requestAnimationFrame(frame);
+      }
+      raf = requestAnimationFrame(frame);
+
+      function close() {
+        running = false;
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', resize);
+        canvas.remove();
+        card.remove();
+      }
+      card.querySelector('.bday-close').addEventListener('click', close);
+      setTimeout(close, 12000);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', start);
+    } else {
+      start();
+    }
+  })();
 })();
