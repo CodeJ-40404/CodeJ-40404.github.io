@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="cyber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADs // LAB — Join, Custom, Ideas</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('codej-theme') || 'cyber';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e){}
+  })();
+</script>
+<style>
+  /* ============ 基础 ============ */
+  html { scroll-behavior: smooth; }
+  body.ads-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: var(--bg);
+  }
+  .ads-wrap { position: relative; z-index: 2; }
+
+  /* ============ 背景层 ============ */
+  #ad-canvas {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none; opacity: 0.85;
+  }
+  .aurora {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    filter: blur(90px); opacity: 0.55;
+  }
+  .aurora span {
+    position: absolute; border-radius: 50%;
+    width: 46vw; height: 46vw; max-width: 620px; max-height: 620px;
+    animation: auroraFloat 18s ease-in-out infinite alternate;
+  }
+  .aurora span:nth-child(1) { background: var(--a1); left: -12%; top: -8%; }
+  .aurora span:nth-child(2) { background: var(--a2); right: -14%; top: 18%; animation-delay: -6s; }
+  .aurora span:nth-child(3) { background: var(--a3); left: 24%; bottom: -20%; animation-delay: -11s; opacity: 0.5; }
+  @keyframes auroraFloat {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(6vw, 4vh, 0) scale(1.18); }
+    100% { transform: translate3d(-5vw, -3vh, 0) scale(0.9); }
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ============ 顶部导航 ============ */
+  .ads-nav {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.85rem clamp(1rem, 4vw, 3rem);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .ads-back {
+    font-size: 0.8rem; letter-spacing: 1px; text-decoration: none;
+    color: var(--a1); white-space: nowrap;
+  }
+  .ads-back:hover { text-shadow: var(--glow-a1); }
+  .ads-links { display: flex; gap: 0.4rem; margin-left: auto; }
+  .ads-links a {
+    font-size: 0.74rem; letter-spacing: 1.5px; text-decoration: none;
+    color: var(--dim); padding: 0.45rem 0.8rem; border-radius: var(--btn-radius);
+    border: 1px solid transparent; transition: color .2s, border-color .2s, background .2s;
+  }
+  .ads-links a:hover { color: var(--a1); border-color: var(--line2); background: var(--panel3); }
+  #theme-toggle { flex-shrink: 0; }
+
+  /* ============ 通用排版 ============ */
+  .ads-section {
+    max-width: 1180px; margin: 0 auto;
+    padding: clamp(4.5rem, 11vh, 8rem) clamp(1rem, 4vw, 2.5rem);
+    position: relative;
+  }
+  .sec-tag {
+    display: inline-flex; align-items: center; gap: .55rem;
+    font-size: .7rem; letter-spacing: 3px; color: var(--a2);
+    border: 1px solid var(--line2); border-radius: 99px;
+    padding: .3rem .85rem; margin-bottom: 1.2rem;
+    background: var(--panel3);
+  }
+  .sec-tag::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--a2); box-shadow: var(--glow-a2);
+    animation: pulseDot 1.8s infinite;
+  }
+  @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+  .sec-h {
+    font-size: clamp(2rem, 5.4vw, 3.6rem); line-height: 1.1;
+    color: var(--title); letter-spacing: -0.02em; margin-bottom: 1rem;
+  }
+  .sec-h .grad {
+    background: linear-gradient(100deg, var(--a1), var(--a2) 55%, var(--a3));
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradShift 7s linear infinite;
+  }
+  @keyframes gradShift { to { background-position: 220% 0; } }
+  .sec-p { max-width: 620px; color: var(--dim); font-size: clamp(.88rem, 1.6vw, 1rem); line-height: 1.9; }
+  .sec-head-split { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.6rem; }
+
+  /* ============ HERO ============ */
+  .ads-hero {
+    min-height: calc(100vh - 62px);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 5rem clamp(1rem, 4vw, 2rem) 4rem;
+    position: relative;
+  }
+  .hero-badge {
+    font-size: .72rem; letter-spacing: 4px; color: var(--dim);
+    border: 1px solid var(--line2); border-radius: 99px;
+    padding: .35rem 1rem; margin-bottom: 2rem;
+    background: var(--panel);
+    animation: badgeGlow 3s ease-in-out infinite;
+  }
+  @keyframes badgeGlow {
+    0%,100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+    50% { box-shadow: 0 0 24px var(--line2); }
+  }
+  .hero-title {
+    position: relative; font-size: clamp(4.2rem, 17vw, 12rem);
+    line-height: .92; letter-spacing: -0.05em; font-weight: 800;
+    color: var(--title); margin-bottom: 1.5rem;
+    text-shadow: var(--title-glow);
+  }
+  .hero-title .glitch {
+    position: relative; display: inline-block;
+    background: linear-gradient(100deg, var(--a1), var(--a2) 50%, var(--a3));
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradShift 6s linear infinite;
+  }
+  .hero-title .glitch::before,
+  .hero-title .glitch::after {
+    content: attr(data-text);
+    position: absolute; inset: 0;
+    background: inherit; -webkit-background-clip: text; background-clip: text;
+    color: transparent; opacity: .75;
+  }
+  .hero-title .glitch::before { animation: glitchA 4.2s infinite steps(1); }
+  .hero-title .glitch::after  { animation: glitchB 5.1s infinite steps(1); }
+  @keyframes glitchA {
+    0%, 92%, 100% { transform: none; clip-path: inset(0 0 100% 0); }
+    93% { transform: translate(-5px, 2px); clip-path: inset(8% 0 62% 0); }
+    95% { transform: translate(5px, -2px); clip-path: inset(46% 0 28% 0); }
+    97% { transform: translate(-3px, 0); clip-path: inset(72% 0 8% 0); }
+  }
+  @keyframes glitchB {
+    0%, 89%, 100% { transform: none; clip-path: inset(0 0 100% 0); }
+    90% { transform: translate(4px, -2px); clip-path: inset(62% 0 12% 0); }
+    94% { transform: translate(-4px, 3px); clip-path: inset(18% 0 56% 0); }
+  }
+  .hero-sub {
+    max-width: 640px; color: var(--text); opacity: .82;
+    font-size: clamp(.92rem, 1.8vw, 1.08rem); line-height: 1.9; margin-bottom: 2.2rem;
+  }
+  .hero-sub b { color: var(--a1); font-weight: 600; }
+  .hero-cta { display: flex; gap: .9rem; flex-wrap: wrap; justify-content: center; }
+
+  .magnet-btn {
+    position: relative; display: inline-flex; align-items: center; gap: .6rem;
+    padding: .95rem 1.9rem; font-size: .92rem; font-weight: 700;
+    letter-spacing: 2px; text-decoration: none; border-radius: var(--btn-radius);
+    clip-path: var(--btn-clip);
+    background: var(--btn1-bg); color: var(--btn1-color);
+    box-shadow: var(--btn1-shadow); border: none;
+    transition: box-shadow .25s, transform .15s;
+    will-change: transform;
+  }
+  .magnet-btn:hover { box-shadow: var(--btn1-shadow-h); }
+  .ghost-btn {
+    position: relative; display: inline-flex; align-items: center; gap: .6rem;
+    padding: .95rem 1.9rem; font-size: .92rem; font-weight: 600;
+    letter-spacing: 2px; text-decoration: none; border-radius: var(--btn-radius);
+    color: var(--btn2-color); background: var(--btn2-bg);
+    border: 1px solid var(--btn2-border);
+    transition: background .25s, box-shadow .25s;
+  }
+  .ghost-btn:hover { background: var(--btn2-bg-h); box-shadow: var(--btn2-shadow-h); }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    font-size: .64rem; letter-spacing: 3px; color: var(--dim);
+  }
+  .scroll-hint i { animation: hintDown 1.8s ease-in-out infinite; }
+  @keyframes hintDown { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(7px);opacity:1} }
+
+  /* ============ 卡片通用 ============ */
+  .glass-card {
+    position: relative; border: 1px solid var(--line2); border-radius: calc(var(--radius) + 6px);
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    box-shadow: var(--card-shadow);
+    transition: transform .3s ease, border-color .3s, box-shadow .3s;
+    overflow: hidden;
+  }
+  .glass-card::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in srgb, var(--a1) 12%, transparent), transparent 45%);
+    opacity: 0; transition: opacity .3s;
+  }
+  .glass-card:hover::before { opacity: 1; }
+  .glass-card:hover { border-color: var(--a1); box-shadow: var(--card-shadow), 0 0 30px var(--line2); }
+
+  /* ============ 01 JOIN ============ */
+  .join-grid {
+    display: grid; grid-template-columns: 1.05fr .95fr; gap: 1.6rem; align-items: stretch;
+  }
+  .terminal {
+    padding: 1.5rem 1.6rem 1.8rem; display: flex; flex-direction: column;
+    font-size: .85rem; line-height: 2;
+  }
+  .term-bar { display: flex; align-items: center; gap: .45rem; margin-bottom: 1.1rem; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line2); }
+  .term-bar i:nth-child(1) { background: #ff5f57; }
+  .term-bar i:nth-child(2) { background: #febc2e; }
+  .term-bar i:nth-child(3) { background: #28c840; }
+  .term-bar span { margin-left: .6rem; font-size: .68rem; color: var(--dim); letter-spacing: 1px; }
+  .term-line { opacity: 0; transform: translateY(5px); animation: termIn .45s forwards; }
+  .term-line:nth-child(2) { animation-delay: .15s; }
+  .term-line:nth-child(3) { animation-delay: .35s; }
+  .term-line:nth-child(4) { animation-delay: .55s; }
+  .term-line:nth-child(5) { animation-delay: .75s; }
+  .term-line:nth-child(6) { animation-delay: .95s; }
+  .term-line:nth-child(7) { animation-delay: 1.15s; }
+  .term-line:nth-child(8) { animation-delay: 1.35s; }
+  @keyframes termIn { to { opacity: 1; transform: none; } }
+  .term-prompt { color: var(--green); }
+  .term-cmd { color: var(--title); }
+  .term-out { color: var(--dim); padding-left: .2rem; }
+  .term-ok { color: var(--a1); text-shadow: var(--glow-a1); }
+  .term-cursor { display: inline-block; width: 8px; height: 15px; background: var(--a1); vertical-align: -2px; animation: cursorBlink 1s steps(1) infinite; }
+  @keyframes cursorBlink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+  .join-side { display: flex; flex-direction: column; gap: 1rem; }
+  .join-roles { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .role-chip {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .8rem .9rem; font-size: .78rem;
+    border: 1px solid var(--line); border-radius: calc(var(--radius) + 4px);
+    background: var(--panel3); color: var(--text);
+    transition: border-color .2s, transform .2s;
+  }
+  .role-chip:hover { border-color: var(--a1); transform: translateY(-2px); }
+  .role-chip i { color: var(--a1); font-size: .9rem; }
+  .join-note {
+    padding: 1.1rem 1.2rem; font-size: .8rem; line-height: 1.85; color: var(--dim);
+    border-left: 2px solid var(--a1); background: var(--panel3);
+    border-radius: 0 calc(var(--radius) + 4px) calc(var(--radius) + 4px) 0;
+  }
+  .join-note b { color: var(--a1); }
+  .join-actions { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: .4rem; }
+
+  /* ============ 02 CUSTOM ============ */
+  .custom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-bottom: 1.6rem; }
+  .showcase { display: flex; flex-direction: column; }
+  .mock-frame {
+    position: relative; height: 220px; overflow: hidden;
+    background: var(--panel2); border-bottom: 1px solid var(--line);
+    padding: .9rem 1rem;
+  }
+  .mock-dots { display: flex; gap: .35rem; margin-bottom: .8rem; }
+  .mock-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); }
+  .mock-url {
+    height: 16px; border-radius: 4px; background: var(--panel3);
+    border: 1px solid var(--line); margin-bottom: .8rem; width: 70%;
+  }
+  .mock-q { font-size: .74rem; color: var(--dim); margin-bottom: .5rem; }
+  .mock-opt {
+    height: 20px; border: 1px solid var(--line); border-radius: 4px;
+    margin-bottom: .4rem; background: var(--panel3);
+    display: flex; align-items: center; padding: 0 .5rem;
+    font-size: .62rem; color: var(--dim);
+    transition: border-color .3s, color .3s, background .3s;
+  }
+  .showcase:hover .mock-opt:first-of-type { border-color: var(--a1); color: var(--a1); background: color-mix(in srgb, var(--a1) 10%, transparent); }
+  .mock-avatar {
+    width: 34px; height: 34px; border-radius: 50%; margin-bottom: .5rem;
+    background: linear-gradient(135deg, var(--a1), var(--a2));
+    box-shadow: var(--glow-a1);
+  }
+  .mock-line { height: 7px; border-radius: 4px; background: var(--line2); margin-bottom: .45rem; }
+  .mock-line.w80 { width: 80%; } .mock-line.w55 { width: 55%; } .mock-line.w65 { width: 65%; }
+  .mock-chips { display: flex; gap: .35rem; margin-top: .6rem; }
+  .mock-chips i { height: 14px; width: 34px; border-radius: 99px; background: var(--panel3); border: 1px solid var(--line2); }
+  .showcase-body { padding: 1.3rem 1.4rem 1.5rem; display: flex; flex-direction: column; gap: .7rem; flex: 1; }
+  .showcase-title { font-size: 1.05rem; color: var(--title); font-weight: 700; }
+  .showcase-desc { font-size: .82rem; color: var(--dim); line-height: 1.8; flex: 1; }
+  .showcase-feats { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .showcase-feats span {
+    font-size: .66rem; padding: .18rem .55rem; border-radius: 99px;
+    border: 1px solid var(--line2); color: var(--dim);
+  }
+  .demo-link {
+    align-self: flex-start; margin-top: .3rem; font-size: .78rem;
+    color: var(--a1); text-decoration: none; letter-spacing: 1px;
+  }
+  .demo-link:hover { text-shadow: var(--glow-a1); }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 2rem 0 2.2rem; }
+  .step {
+    padding: 1.3rem 1.1rem; position: relative;
+    border-top: 1px solid var(--line2);
+  }
+  .step::before {
+    content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 1px;
+    background: var(--a1); box-shadow: var(--glow-a1);
+    transition: width .5s ease;
+  }
+  .step:hover::before { width: 100%; }
+  .step-num {
+    font-size: 1.6rem; font-weight: 800; line-height: 1;
+    color: transparent; -webkit-text-stroke: 1px var(--a2);
+    margin-bottom: .7rem;
+  }
+  .step-name { font-size: .9rem; color: var(--title); font-weight: 600; margin-bottom: .4rem; }
+  .step-desc { font-size: .76rem; color: var(--dim); line-height: 1.8; }
+  .custom-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.2rem; flex-wrap: wrap;
+    padding: 1.4rem 1.5rem; border: 1px dashed var(--line2);
+    border-radius: calc(var(--radius) + 6px); background: var(--panel3);
+  }
+  .custom-foot p { font-size: .82rem; color: var(--dim); line-height: 1.8; max-width: 620px; }
+  .custom-foot b { color: var(--text); }
+
+  /* ============ 03 IDEAS ============ */
+  .ideas-layout { display: grid; grid-template-columns: 1.15fr .85fr; gap: 1.6rem; align-items: start; }
+  .idea-chips { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1.4rem 0 1.8rem; }
+  .idea-chip {
+    font-size: .76rem; padding: .45rem .9rem; border-radius: 99px;
+    border: 1px solid var(--line2); color: var(--dim); background: var(--panel);
+    transition: all .25s; cursor: default;
+  }
+  .idea-chip:hover {
+    color: var(--a1); border-color: var(--a1);
+    transform: translateY(-3px) rotate(-1deg);
+    box-shadow: 0 0 18px var(--line2);
+  }
+  .idea-flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-item { display: flex; gap: .9rem; position: relative; padding-bottom: 1.4rem; }
+  .flow-item:last-child { padding-bottom: 0; }
+  .flow-item::before {
+    content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 1px;
+    background: var(--line2);
+  }
+  .flow-item:last-child::before { display: none; }
+  .flow-dot {
+    width: 27px; height: 27px; flex-shrink: 0; border-radius: 50%;
+    display: grid; place-items: center; font-size: .7rem; font-weight: 700;
+    border: 1px solid var(--a1); color: var(--a1); background: var(--panel);
+    box-shadow: inset 0 0 10px var(--line2);
+  }
+  .flow-text strong { display: block; font-size: .86rem; color: var(--title); margin-bottom: .2rem; font-weight: 600; }
+  .flow-text span { font-size: .76rem; color: var(--dim); line-height: 1.75; }
+  .idea-side { padding: 1.5rem 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+  .idea-side h3 { font-size: .98rem; color: var(--title); }
+  .idea-side p { font-size: .78rem; color: var(--dim); line-height: 1.8; }
+  .idea-side .big-cta { width: 100%; justify-content: center; }
+  .idea-stats { display: flex; gap: 1rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+  .idea-stats div { flex: 1; }
+  .idea-stats b { display: block; font-size: 1.3rem; color: var(--a1); line-height: 1.2; }
+  .idea-stats span { font-size: .66rem; color: var(--dim); letter-spacing: 1px; }
+
+  /* ============ 页脚 ============ */
+  .ads-footer {
+    text-align: center; padding: 3rem 1rem 3.5rem;
+    border-top: 1px solid var(--line); color: var(--dim); font-size: .75rem;
+  }
+  .ads-footer a { color: var(--a1); text-decoration: none; }
+  .ads-footer a:hover { text-decoration: underline; }
+
+  /* ============ 滚动揭示 ============ */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 900px) {
+    .join-grid, .custom-grid, .ideas-layout { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .ads-hero { min-height: auto; padding-top: 5rem; padding-bottom: 5rem; }
+    .scroll-hint { display: none; }
+  }
+  @media (max-width: 640px) {
+    .ads-nav { padding: .7rem 1rem; gap: .6rem; }
+    .ads-links { display: none; }
+    .ads-back { font-size: .74rem; }
+    .hero-title { font-size: clamp(3.6rem, 22vw, 6rem); }
+    .hero-cta { flex-direction: column; width: 100%; }
+    .hero-cta > a { justify-content: center; width: 100%; }
+    .join-roles { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .custom-foot { flex-direction: column; align-items: stretch; text-align: center; }
+    .custom-foot .magnet-btn { justify-content: center; }
+    .join-actions > a { flex: 1; justify-content: center; }
+    .mock-frame { height: 190px; }
+    .ads-section { padding-top: 3.6rem; padding-bottom: 3.6rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body class="ads-page">
+<canvas id="ad-canvas" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="noise" aria-hidden="true"></div>
+
+<div class="ads-wrap">
+  <header class="ads-nav">
+    <a class="ads-back" href="index.html">← CODEJ://40404</a>
+    <nav class="ads-links" aria-label="分区导航">
+      <a href="#join">01 JOIN-US</a>
+      <a href="#custom">02 CUSTOM</a>
+      <a href="#ideas">03 IDEAS</a>
+    </nav>
+    <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换主题"></button>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="ads-hero">
+      <div class="hero-badge">ADs LAB // BUILD WITH CODEJ</div>
+      <h1 class="hero-title"><span class="glitch" data-text="ADs">ADs</span></h1>
+      <p class="hero-sub">
+        这里是主页之外的实验场：<b>招募伙伴</b>、<b>定制作品</b>、<b>收集灵感</b>。<br>
+        如果你也想把脑子里的东西变成能跑起来的网页，往下看。
+      </p>
+      <div class="hero-cta">
+        <a class="magnet-btn" href="#join"><i class="fas fa-user-plus"></i> 加入我们</a>
+        <a class="ghost-btn" href="#custom"><i class="fas fa-wand-magic-sparkles"></i> 我要定制</a>
+        <a class="ghost-btn" href="#ideas"><i class="fas fa-lightbulb"></i> 投递灵感</a>
+      </div>
+      <div class="scroll-hint"><span>SCROLL</span><i class="fas fa-chevron-down"></i></div>
+    </section>
+
+    <!-- 01 JOIN-US -->
+    <section id="join" class="ads-section reveal">
+      <div class="sec-head-split">
+        <div>
+          <div class="sec-tag">01 // RECRUITMENT</div>
+          <h2 class="sec-h">JOIN<span class="grad">-US</span></h2>
+          <p class="sec-p">一起把脑洞做成真正能运行的东西。无论你会写代码、画像素、写剧情，还是只想帮忙测试，都有你的位置。</p>
+        </div>
+      </div>
+
+      <div class="join-grid">
+        <div class="glass-card terminal" aria-label="招募终端预览">
+          <div class="term-bar"><i></i><i></i><i></i><span>codej@40404: ~/recruit</span></div>
+          <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">whoami</span></div>
+          <div class="term-line term-out">CodeJ-40404 · 独立开发者</div>
+          <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">cat mission.txt</span></div>
+          <div class="term-line term-out">用代码构建属于自己的世界，顺便拉几个人一起。</div>
+          <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">ls team/</span></div>
+          <div class="term-line term-out">cpp-dev  level-design  pixel-art  docs  testers</div>
+          <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">join --repo Chemical-World</span></div>
+          <div class="term-line term-ok">[ OK ] ACCESS GRANTED — 欢迎加入<span class="term-cursor"></span></div>
+        </div>
+
+        <div class="join-side">
+          <div class="join-roles">
+            <div class="role-chip"><i class="fas fa-code"></i> C++ 开发</div>
+            <div class="role-chip"><i class="fas fa-gamepad"></i> 游戏策划</div>
+            <div class="role-chip"><i class="fas fa-palette"></i> 像素美术</div>
+            <div class="role-chip"><i class="fas fa-book"></i> 文档 / 翻译</div>
+            <div class="role-chip"><i class="fas fa-bug"></i> 测试 / 反馈</div>
+            <div class="role-chip"><i class="fas fa-lightbulb"></i> 只想提想法</div>
+          </div>
+          <div class="join-note">
+            <b>怎么加入？</b><br>
+            先浏览 <b>Chemical-World</b> 仓库的 README 和 Issues，了解项目方向；然后提交一条加入申请，简单介绍你会什么、想做什么。看到后会尽快回复。
+          </div>
+          <div class="join-actions">
+            <a class="magnet-btn" href="https://github.com/CodeJ-40404/Chemical-World" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-github"></i> 进入仓库
+            </a>
+            <a class="ghost-btn"
+               href="https://github.com/CodeJ-40404/Chemical-World/issues/new"
+               data-issue-repo="Chemical-World"
+               data-issue-title="[Join] 申请加入 Chemical-World"
+               data-issue-body="## 我是谁&#10;（昵称 / GitHub）&#10;&#10;## 我会什么&#10;（语言 / 技能 / 作品链接）&#10;&#10;## 我想参与什么&#10;（开发 / 策划 / 美术 / 文档 / 测试）&#10;&#10;## 其他想说的"
+               target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-paper-plane"></i> 提交加入申请
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 CUSTOM -->
+    <section id="custom" class="ads-section reveal">
+      <div class="sec-head-split">
+        <div>
+          <div class="sec-tag">02 // CUSTOM SERVICE</div>
+          <h2 class="sec-h">希望<span class="grad">定制？</span></h2>
+          <p class="sec-p">想要一个专属于自己的网页？我可以帮你从零做一套：专属问答卷页面，或者一张有质感的单页个人介绍。</p>
+        </div>
+      </div>
+
+      <div class="custom-grid">
+        <div class="glass-card showcase">
+          <div class="mock-frame" aria-hidden="true">
+            <div class="mock-dots"><i></i><i></i><i></i></div>
+            <div class="mock-url"></div>
+            <div class="mock-q">Q1 · 我最喜欢的语言是？</div>
+            <div class="mock-opt">A. C++</div>
+            <div class="mock-opt">B. Java</div>
+            <div class="mock-opt">C. CSS</div>
+          </div>
+          <div class="showcase-body">
+            <h3 class="showcase-title">专属问答卷页面</h3>
+            <p class="showcase-desc">把你的喜好、经历、梗做成一套只属于你的问答卷。朋友来答题，答完立刻看到对错反馈和得分，还能加彩蛋评语。</p>
+            <div class="showcase-feats">
+              <span>单选 / 多选</span><span>填空 / 简答</span><span>即时反馈</span><span>评分评级</span><span>三主题</span>
+            </div>
+            <a class="demo-link" href="quiz.html">看看示例 →</a>
+          </div>
+        </div>
+
+        <div class="glass-card showcase">
+          <div class="mock-frame" aria-hidden="true">
+            <div class="mock-dots"><i></i><i></i><i></i></div>
+            <div class="mock-url" style="width:45%"></div>
+            <div class="mock-avatar"></div>
+            <div class="mock-line w80"></div>
+            <div class="mock-line w55"></div>
+            <div class="mock-line w65"></div>
+            <div class="mock-chips"><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="showcase-body">
+            <h3 class="showcase-title">单页个人介绍</h3>
+            <p class="showcase-desc">一页展示你的身份、项目、技能与联系方式。支持主题切换、动效、项目卡片和互动彩蛋，手机端也好看。</p>
+            <div class="showcase-feats">
+              <span>响应式</span><span>主题切换</span><span>动效</span><span>SEO 友好</span><span>零托管费</span>
+            </div>
+            <a class="demo-link" href="index.html">看看示例 →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-name">说说需求</div>
+          <div class="step-desc">告诉我你想要什么风格、包含哪些内容，以及参考站点。</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-name">收集素材</div>
+          <div class="step-desc">我发你一份问答清单，填完就能拿到你的全部信息与偏好。</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-name">设计开发</div>
+          <div class="step-desc">确定视觉方向后开始实现，过程中随时可以提修改意见。</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-name">部署上线</div>
+          <div class="step-desc">交付源码并协助部署到 GitHub Pages，域名绑定也能帮你弄。</div>
+        </div>
+      </div>
+
+      <div class="custom-foot">
+        <p>
+          <b>核心亮点：</b>纯静态零依赖、自带三套主题、移动端适配、代码可读可维护。<br>
+          想要图文并茂的详细介绍？直接开一条 Issue，我会给你完整方案与报价。
+        </p>
+        <a class="magnet-btn"
+           href="https://github.com/CodeJ-40404/CodeJ-40404/issues/new"
+           data-issue-repo="CodeJ-40404"
+           data-issue-title="[Custom] 我想定制一个网页"
+           data-issue-body="## 我想要&#10;- [ ] 专属问答卷页面&#10;- [ ] 单页个人介绍&#10;- [ ] 其他&#10;&#10;## 风格偏好&#10;（赛博朋克 / 星空 / 简约现代 / 其他）&#10;&#10;## 必须包含的内容&#10;- &#10;&#10;## 参考链接&#10;- &#10;&#10;## 期望上线时间&#10;（不用太精确）"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-rocket"></i> 开始定制
+        </a>
+      </div>
+    </section>
+
+    <!-- 03 IDEAS -->
+    <section id="ideas" class="ads-section reveal">
+      <div class="sec-head-split">
+        <div>
+          <div class="sec-tag">03 // IDEAS WANTED</div>
+          <h2 class="sec-h">灵感<span class="grad">泉涌？</span></h2>
+          <p class="sec-p">新游戏玩法、功能改进、隐藏彩蛋、剧情设定……任何脑洞都欢迎。哪怕只有一句话，也可能变成下一个作品。</p>
+        </div>
+      </div>
+
+      <div class="ideas-layout">
+        <div>
+          <div class="idea-chips">
+            <span class="idea-chip">🎮 新游戏玩法</span>
+            <span class="idea-chip">🧩 机制改造</span>
+            <span class="idea-chip">🥚 隐藏彩蛋</span>
+            <span class="idea-chip">🎨 界面体验</span>
+            <span class="idea-chip">⚡ 性能优化</span>
+            <span class="idea-chip">📖 剧情设定</span>
+            <span class="idea-chip">🔊 音效音乐</span>
+            <span class="idea-chip">📱 移动端</span>
+            <span class="idea-chip">🛠 开发工具</span>
+          </div>
+
+          <div class="idea-flow">
+            <div class="flow-item">
+              <div class="flow-dot">1</div>
+              <div class="flow-text">
+                <strong>描述你的想法</strong>
+                <span>越具体越好：想解决什么问题，或者希望玩家体验到什么。</span>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-dot">2</div>
+              <div class="flow-text">
+                <strong>提交 Issue</strong>
+                <span>点右侧按钮，标题和模板已经帮你填好，补充内容即可提交。</span>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-dot">3</div>
+              <div class="flow-text">
+                <strong>一起讨论</strong>
+                <span>我会在 Issue 里回复可行性、实现方式和大致的优先级。</span>
+              </div>
+            </div>
+            <div class="flow-item">
+              <div class="flow-dot">4</div>
+              <div class="flow-text">
+                <strong>变成现实</strong>
+                <span>被采纳的想法会被排进计划，做成之后会标注你的名字。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card idea-side">
+          <h3>把你脑子里的东西丢过来</h3>
+          <p>不用写得像需求文档，有个方向就行。游戏、网页、工具都可以，甚至只是「我觉得这个按钮可以更好玩」。</p>
+          <a class="magnet-btn big-cta"
+             href="https://github.com/CodeJ-40404/CodeJ-40404/issues/new"
+             data-issue-repo="CodeJ-40404"
+             data-issue-title="[Idea] 我有一个想法"
+             data-issue-body="## 灵感内容&#10;（一句话描述也可以）&#10;&#10;## 它解决什么问题 / 带来什么体验&#10;- &#10;&#10;## 参考或草图&#10;- "
+             target="_blank" rel="noopener noreferrer">
+            <i class="fas fa-lightbulb"></i> 投递灵感
+          </a>
+          <a class="ghost-btn"
+             href="https://github.com/CodeJ-40404/CodeJ-40404/issues"
+             target="_blank" rel="noopener noreferrer"
+             style="justify-content:center">
+            <i class="fab fa-github"></i> 看看已有讨论
+          </a>
+          <div class="idea-stats">
+            <div><b>∞</b><span>灵感上限</span></div>
+            <div><b>24h</b><span>内会回复</span></div>
+            <div><b>0</b><span>门槛</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ads-footer">
+    <p>ADs LAB · built by <a href="index.html">CodeJ-40404</a> · <a href="https://github.com/CodeJ-40404" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    <p style="margin-top:.4rem;opacity:.6">把想法变成代码，把代码变成世界。</p>
+  </footer>
+</div>
+
+<script>
+/* ================= 主题 ================= */
+var THEMES = [
+  { id: 'modern', name: 'MODERN', icon: 'fa-feather' },
+  { id: 'star',   name: 'STAR',   icon: 'fa-star' },
+  { id: 'cyber',  name: 'CYBER',  icon: 'fa-bolt' }
+];
+var themeBtn = document.getElementById('theme-toggle');
+function currentTheme() { return document.documentElement.dataset.theme || 'cyber'; }
+function applyTheme(id) {
+  document.documentElement.dataset.theme = id;
+  try { localStorage.setItem('codej-theme', id); } catch(e) {}
+  var t = THEMES.filter(function(x){ return x.id === id; })[0];
+  if (themeBtn && t) {
+    themeBtn.innerHTML = '<i class="fas ' + t.icon + '"></i> ' + t.name;
+    var next = THEMES[(THEMES.indexOf(t) + 1) % THEMES.length];
+    themeBtn.title = '切换主题 → ' + next.name;
+    themeBtn.setAttribute('aria-label', '切换主题，当前 ' + t.name);
+  }
+}
+if (themeBtn) {
+  themeBtn.addEventListener('click', function(){
+    var i = THEMES.map(function(t){ return t.id; }).indexOf(currentTheme());
+    applyTheme(THEMES[(i + 1) % THEMES.length].id);
+  });
+}
+applyTheme(currentTheme());
+
+/* ================= Issue 模板链接 ================= */
+document.querySelectorAll('[data-issue-title]').forEach(function (a) {
+  var repo = a.getAttribute('data-issue-repo') || 'CodeJ-40404';
+  var title = a.getAttribute('data-issue-title') || '';
+  var body = (a.getAttribute('data-issue-body') || '').replace(/&#10;/g, '\n');
+  a.href = 'https://github.com/CodeJ-40404/' + repo +
+           '/issues/new?title=' + encodeURIComponent(title) +
+           '&body=' + encodeURIComponent(body);
+});
+
+/* ================= 滚动揭示 ================= */
+var revealEls = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window) {
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(function (el) { io.observe(el); });
+} else {
+  revealEls.forEach(function (el) { el.classList.add('in'); });
+}
+
+/* ================= 卡片光斑 + 3D 倾斜 ================= */
+var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.glass-card').forEach(function (card) {
+  card.addEventListener('mousemove', function (e) {
+    var r = card.getBoundingClientRect();
+    var x = e.clientX - r.left, y = e.clientY - r.top;
+    card.style.setProperty('--mx', x + 'px');
+    card.style.setProperty('--my', y + 'px');
+    if (!reducedMotion) {
+      var rx = ((y / r.height) - 0.5) * -4;
+      var ry = ((x / r.width) - 0.5) * 4;
+      card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+    }
+  });
+  card.addEventListener('mouseleave', function () {
+    card.style.transform = '';
+  });
+});
+
+/* ================= 磁吸按钮 ================= */
+document.querySelectorAll('.magnet-btn').forEach(function (btn) {
+  if (reducedMotion) return;
+  btn.addEventListener('mousemove', function (e) {
+    var r = btn.getBoundingClientRect();
+    var dx = (e.clientX - r.left - r.width / 2) * 0.18;
+    var dy = (e.clientY - r.top - r.height / 2) * 0.28;
+    btn.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  });
+  btn.addEventListener('mouseleave', function () { btn.style.transform = ''; });
+});
+
+/* ================= 粒子星网画布 ================= */
+(function () {
+  var canvas = document.getElementById('ad-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var W = 0, H = 0, dpr = 1;
+  var mouse = { x: -9999, y: -9999 };
+  var colorA = { r: 0, g: 240, b: 255 }, colorB = { r: 255, g: 42, b: 109 };
+
+  function hexToRgb(hex) {
+    hex = (hex || '').trim();
+    if (hex.charAt(0) !== '#') return null;
+    if (hex.length === 4) {
+      hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+    }
+    if (hex.length !== 7) return null;
+    return {
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16)
+    };
+  }
+  function readColors() {
+    var cs = getComputedStyle(document.documentElement);
+    colorA = hexToRgb(cs.getPropertyValue('--a1')) || colorA;
+    colorB = hexToRgb(cs.getPropertyValue('--a2')) || colorB;
+  }
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var count = Math.min(110, Math.max(36, Math.round(W * H / 16000)));
+    particles = [];
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.6 + 0.6
+      });
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    var i, j, p, q, dx, dy, dist, link = 130;
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
+      if (p.y < -20) p.y = H + 20; else if (p.y > H + 20) p.y = -20;
+
+      // 鼠标轻微排斥
+      dx = p.x - mouse.x; dy = p.y - mouse.y;
+      dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 110 && dist > 0.1) {
+        var f = (110 - dist) / 110 * 0.55;
+        p.x += dx / dist * f; p.y += dy / dist * f;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + colorA.r + ',' + colorA.g + ',' + colorA.b + ',0.55)';
+      ctx.fill();
+    }
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      for (j = i + 1; j < particles.length; j++) {
+        q = particles[j];
+        dx = p.x - q.x; dy = p.y - q.y;
+        dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < link) {
+          var alpha = (1 - dist / link) * 0.22;
+          var c = (i % 3 === 0) ? colorB : colorA;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  var raf = null;
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', function (e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('mouseout', function () { mouse.x = mouse.y = -9999; });
+  document.addEventListener('click', function (e) {
+    // 点击涟漪
+    var ripple = document.createElement('span');
+    ripple.style.cssText = 'position:fixed;left:' + e.clientX + 'px;top:' + e.clientY + 'px;width:6px;height:6px;border-radius:50%;' +
+      'border:1px solid var(--a1);pointer-events:none;z-index:60;transform:translate(-50%,-50%);';
+    document.body.appendChild(ripple);
+    ripple.animate([
+      { width: '6px', height: '6px', opacity: 1 },
+      { width: '90px', height: '90px', opacity: 0 }
+    ], { duration: 650, easing: 'ease-out' }).onfinish = function () { ripple.remove(); };
+  });
+
+  resize();
+  readColors();
+  if (!reducedMotion) {
+    draw();
+  } else {
+    // 静态绘制一帧
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(function (p) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + colorA.r + ',' + colorA.g + ',' + colorA.b + ',0.5)';
+      ctx.fill();
+    });
+  }
+  // 主题变化后刷新颜色
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+    else if (!reducedMotion && !raf) { draw(); }
+  });
+})();
+</script>
+</body>
+</html>
