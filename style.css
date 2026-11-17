@@ -158,6 +158,7 @@ html[data-theme="cyber"] .scanlines,
 html[data-theme="cyber"] .flicker { display: block; }
 html[data-theme="star"] #stars { display: block; }
 
+
 #matrix, #stars {
   position: fixed;
   inset: 0;
@@ -1155,6 +1156,76 @@ footer .flicker-word { color: var(--a2); animation: word-flicker 5s infinite; }
 @media (max-width: 760px) {
   .quiz-preview { grid-template-columns: 1fr; }
   .qp-big { font-size: 3.5rem; }
+}
+
+/* ---------- ADs 入口 ---------- */
+.ads-entry {
+  position: relative;
+  margin-top: 1.4rem;
+  padding: 1px;
+  border-radius: calc(var(--radius) + 2px);
+  overflow: hidden;
+  background: var(--line2);
+}
+.ads-entry::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 200%; aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg,
+    transparent 0 62%,
+    var(--a1) 72%,
+    var(--a2) 82%,
+    var(--a3) 90%,
+    transparent 100%);
+  animation: adsSweep 6s linear infinite;
+}
+@keyframes adsSweep {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.ads-entry-inner {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1.8rem;
+  padding: 1.6rem 1.8rem;
+  border-radius: calc(var(--radius) + 1px);
+  background: var(--panel2);
+}
+.ads-entry-kicker {
+  font-size: 0.66rem; letter-spacing: 2px;
+  color: var(--a2); margin-bottom: 0.45rem;
+}
+.ads-entry-title {
+  font-size: 1.3rem; color: var(--title);
+  margin: 0 0 0.4rem; font-weight: 700;
+}
+.ads-entry-desc {
+  font-size: 0.8rem; line-height: 1.8;
+  color: var(--dim); max-width: 460px;
+}
+.ads-entry-list { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.ads-entry-item {
+  font-size: 0.68rem; letter-spacing: 1px; white-space: nowrap;
+  padding: 0.42rem 0.8rem; border-radius: 99px;
+  border: 1px solid var(--line2); color: var(--dim);
+  transition: color 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+.ads-entry:hover .ads-entry-item {
+  color: var(--a1); border-color: var(--a1);
+  box-shadow: 0 0 14px var(--line2);
+}
+.ads-entry-btn { white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .ads-entry-inner {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+    padding: 1.3rem 1.2rem;
+  }
+  .ads-entry-btn { justify-self: start; }
 }
 
 /* ---------- GAMES 掌机板块 ---------- */
