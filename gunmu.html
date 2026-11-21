@@ -268,6 +268,7 @@
             gap: 20px;
             padding: 20px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
         #start-menu h2 {
             color: #ff0000;
@@ -317,6 +318,13 @@
         }
         .upload-area input[type="file"] {
             display: none;
+        }
+        #music-name {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            word-break: break-all;
+            max-width: 100%;
         }
         #preview-img {
             max-width: 120px;
@@ -446,6 +454,12 @@
             <img id="preview-img" src="gunmu.png" alt="预览" style="display: block;">
             <div style="font-size: 12px; color: #888;">默认图片: gunmu.png</div>
         </div>
+        <div class="upload-area">
+            <label for="music-upload">🎵 点击导入本地音乐（循环播放）</label>
+            <input type="file" id="music-upload" accept="audio/*,video/mp4,.mp3,.wav,.ogg,.m4a,.flac,.mp4">
+            <div id="music-name">未选择音乐</div>
+            <button class="menu-btn" id="music-toggle" type="button" style="display: none; font-size: 15px; padding: 8px 22px;">⏸ 暂停音乐</button>
+        </div>
         <button class="menu-btn" id="start-btn">开 始 游 戏</button>
         <div id="gunmu-count-display">当前棍木数量: 0</div>
     </div>
@@ -496,6 +510,9 @@
             const imageUpload = document.getElementById('image-upload');
             const previewImg = document.getElementById('preview-img');
             const gunmuCountDisplay = document.getElementById('gunmu-count-display');
+            const musicUpload = document.getElementById('music-upload');
+            const musicName = document.getElementById('music-name');
+            const musicToggle = document.getElementById('music-toggle');
 
             // ---------- 全局状态 ----------
             let isGameOver = false;
@@ -1093,10 +1110,41 @@
                     const dataUrl = ev.target.result;
                     gunmuImageSrc = dataUrl;
                     previewImg.src = dataUrl;
-                    // 更新所有已存在的棍木图片（如果已经开始游戏，但开始菜单阶段没有）
-                    // 游戏开始后生成的棍木会用新的图
+                    // 突脸图也要跟着换，否则一直是默认的 gunmu.png
+                    jumpscareImg.src = dataUrl;
+                    // 若游戏中已有棍木，同步替换贴图
+                    document.querySelectorAll('.gunmu-img').forEach((img) => { img.src = dataUrl; });
                 };
                 reader.readAsDataURL(file);
+            });
+
+            // ---------- 本地音乐 ----------
+            let bgm = null;
+            musicUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (bgm) {
+                    bgm.pause();
+                    URL.revokeObjectURL(bgm.src);
+                }
+                bgm = new Audio(URL.createObjectURL(file));
+                bgm.loop = true;
+                bgm.volume = 0.7;
+                musicName.textContent = '🎵 ' + file.name;
+                musicToggle.style.display = 'inline-block';
+                musicToggle.textContent = '⏸ 暂停音乐';
+                bgm.play().catch(() => {});
+            });
+
+            musicToggle.addEventListener('click', () => {
+                if (!bgm) return;
+                if (bgm.paused) {
+                    bgm.play().catch(() => {});
+                    musicToggle.textContent = '⏸ 暂停音乐';
+                } else {
+                    bgm.pause();
+                    musicToggle.textContent = '▶ 播放音乐';
+                }
             });
 
             startBtn.addEventListener('click', () => {
