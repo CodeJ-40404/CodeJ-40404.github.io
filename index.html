@@ -12,7 +12,7 @@
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="app.js?v=2" defer></script>
+  <script src="app.js?v=4" defer></script>
   <script src="gallery.js" defer></script>
 </head>
 <body>
@@ -359,5 +359,31 @@
       <button class="boring-btn" type="button">看看风景 // GALLERY <i class="fas fa-wand-magic-sparkles"></i></button>
     </span>
   </footer>
+
+  <!-- 左侧工具栏 -->
+  <aside class="dock" id="dock">
+    <button class="dock-toggle" id="dock-toggle" type="button" aria-label="收起工具栏" aria-expanded="true">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="dock-inner">
+      <button class="dock-item" type="button" data-tool="ticket" title="生成一张可保存的车票">
+        <i class="fas fa-ticket-alt"></i><span>来张车票</span>
+      </button>
+      <button class="dock-item" type="button" data-tool="music" id="dock-music" title="导入本地音乐（支持 mp4）">
+        <i class="fas fa-music"></i><span>放首音乐</span>
+      </button>
+      <button class="dock-item" type="button" data-tool="bg" title="替换液态玻璃主题的背景">
+        <i class="fas fa-image"></i><span>换个背景</span>
+      </button>
+      <button class="dock-item" type="button" data-tool="style" title="手动调整当前页面样式">
+        <i class="fas fa-sliders-h"></i><span>调整样式</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="dock-panel" id="dock-panel" hidden></div>
+
+  <input type="file" id="dock-music-file" accept="audio/*,video/mp4,.mp3,.wav,.ogg,.m4a,.flac,.mp4" hidden>
+  <input type="file" id="dock-bg-file" accept="image/*" hidden>
 </body>
 </html>
