@@ -1,5 +1,11 @@
 [
   {
+    "slug": "Dijkstra",
+    "title": "笔记：Dijkstra",
+    "date": "2026-11-21",
+    "tag": "ALGO"
+  },
+  {
     "slug": "p17853-solution",
     "title": "个人题解-P17853 [LBA-OI R6 A] Su通ki信yu题ri",
     "date": "2026-11-21",
