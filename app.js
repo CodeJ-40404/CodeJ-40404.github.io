@@ -729,6 +729,8 @@
 
     var tkFont = read('codej-ticket-font') || 'yahei';
     if (!fontCss(tkFont)) tkFont = 'yahei';
+    var tkFormat = read('codej-ticket-format') || 'png';
+    if (tkFormat !== 'png' && tkFormat !== 'jpg') tkFormat = 'png';
 
     function pad2(n) { return n < 10 ? '0' + n : String(n); }
     function todayStr() {
@@ -1353,15 +1355,9 @@
       drawNotches(g, 620);
     }
 
-    function makeTicket() {
-      var cv = document.createElement('canvas');
-      cv.width = TK_W * 2;
-      cv.height = TK_H * 2;
-      var g = cv.getContext('2d');
-      g.scale(2, 2);
-
+    function ticketMeta() {
       var cs = getComputedStyle(root);
-      var m = {
+      return {
         a1: cs.getPropertyValue('--a1').trim() || '#00f0ff',
         a2: cs.getPropertyValue('--a2').trim() || '#ff2a6d',
         font: fontCss(tkFont) || fontCss('yahei'),
@@ -1372,7 +1368,10 @@
         klass: '二等座',
         fare: '¥ 404.00'
       };
-      var opt = {
+    }
+
+    function ticketOpt() {
+      return {
         bg: tkCustom.bg,
         a1: tkCustom.a1,
         a2: tkCustom.a2,
@@ -1380,18 +1379,92 @@
         to: String(tkCustom.to || '').trim().slice(0, 8) || '开源站',
         who: String(tkCustom.who || '').trim().slice(0, 12) || 'CodeJ-40404'
       };
+    }
 
-      if (tkSel === 'minimal') drawMinimal(g, opt, m);
-      else if (tkSel === 'tech') drawTech(g, opt, m);
-      else if (tkSel === 'custom') drawCustom(g, opt, m);
-      else drawRail(g, opt, m);
+    function paintTicket(g, m) {
+      var o = ticketOpt();
+      if (tkSel === 'minimal') drawMinimal(g, o, m);
+      else if (tkSel === 'tech') drawTech(g, o, m);
+      else if (tkSel === 'custom') drawCustom(g, o, m);
+      else drawRail(g, o, m);
+    }
 
+    function ticketCanvas(scale, m) {
+      var cv = document.createElement('canvas');
+      cv.width = TK_W * scale;
+      cv.height = TK_H * scale;
+      var g = cv.getContext('2d');
+      g.scale(scale, scale);
+      // JPG 不支持透明，先铺白底，避免撕口变黑
+      if (tkFormat === 'jpg') {
+        g.fillStyle = '#ffffff';
+        g.fillRect(0, 0, TK_W, TK_H);
+      }
+      paintTicket(g, m);
+      return cv;
+    }
+
+    // iOS 的 a[download] 对 dataURL 基本无效，改为展示大图让用户长按保存
+    function isIOS() {
+      return /iP(hone|ad|od)/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function showSaveOverlay(url) {
+      var box = document.getElementById('tk-save');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'tk-save';
+        box.className = 'tk-save';
+        box.hidden = true;
+        box.innerHTML = '<div class="tk-save-box"><img alt="车票">' +
+          '<p>长按图片 → 存储到照片</p>' +
+          '<button class="dock-act" type="button">关闭</button></div>';
+        document.body.appendChild(box);
+        box.querySelector('button').addEventListener('click', function () { box.hidden = true; });
+        box.addEventListener('click', function (e) {
+          if (e.target === box) box.hidden = true;
+        });
+      }
+      box.querySelector('img').src = url;
+      box.hidden = false;
+    }
+
+    function fallbackDownload(cv, mime, name) {
       var a = document.createElement('a');
-      a.download = 'codej-ticket-' + tkSel + '-' + m.date + '.png';
-      a.href = cv.toDataURL('image/png');
+      a.download = name;
+      a.href = cv.toDataURL(mime, 0.92);
+      a.rel = 'noopener';
       document.body.appendChild(a);
       a.click();
       a.remove();
+    }
+
+    function saveTicket() {
+      var m = ticketMeta();
+      var cv = ticketCanvas(2, m);
+      var mime = tkFormat === 'jpg' ? 'image/jpeg' : 'image/png';
+      var name = 'codej-ticket-' + tkSel + '-' + m.date + '.' + (tkFormat === 'jpg' ? 'jpg' : 'png');
+
+      if (isIOS()) { showSaveOverlay(cv.toDataURL(mime, 0.92)); return; }
+
+      // 用 Blob 下载，Safari 桌面端对 dataURL + download 支持不稳定
+      if (cv.toBlob) {
+        cv.toBlob(function (blob) {
+          if (!blob) { fallbackDownload(cv, mime, name); return; }
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.download = name;
+          a.href = url;
+          a.rel = 'noopener';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+        }, mime, 0.92);
+      } else {
+        fallbackDownload(cv, mime, name);
+      }
     }
 
     function openTicketPanel(btn) {
@@ -1408,7 +1481,7 @@
       openPanel(btn,
         '<div class="dock-panel-title"><span><i class="fas fa-ticket-alt"></i> 来张车票</span>' +
         '<button class="dock-x" type="button" data-close>✕</button></div>' +
-        '<p class="dock-hint">挑一个样式，生成一张可以保存的车票图片。</p>' +
+        '<p class="dock-hint">挑一个样式，下方实时预览；iOS 会打开大图，长按即可保存。</p>' +
         '<div class="ticket-grid">' + cards + '</div>' +
         '<label class="tk-label">票面字体<select class="style-select" data-tkfont>' +
         buildFontOptions(tkFont, true) + '</select></label>' +
@@ -1425,10 +1498,30 @@
         '</div>' +
         '<label class="tk-label">乘客<input class="tk-input" type="text" maxlength="12" data-f="who" value="' + esc(tkCustom.who) + '"></label>' +
         '</div>' +
+        '<div class="tk-preview-wrap">' +
+        '<img class="tk-preview" id="tk-preview" alt="车票预览">' +
+        '<span>长按预览图也可直接保存</span></div>' +
+        '<div class="tk-format"><span>保存格式</span>' +
+        '<select class="style-select" id="tk-format">' +
+        '<option value="png"' + (tkFormat === 'png' ? ' selected' : '') + '>PNG · 清晰 / 透明</option>' +
+        '<option value="jpg"' + (tkFormat === 'jpg' ? ' selected' : '') + '>JPG · 体积更小</option>' +
+        '</select></div>' +
         '<div class="dock-actions"><button class="dock-act primary" type="button" id="tk-gen">' +
-        '<i class="fas fa-download"></i> 生成并下载</button></div>');
+        '<i class="fas fa-download"></i> 保存图片</button></div>');
 
       if (panel.hidden) return;
+
+      var previewImg = document.getElementById('tk-preview');
+      var previewMeta = ticketMeta();
+      var previewTimer = null;
+      function refreshPreview(now) {
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(function () {
+          if (!previewImg) return;
+          var cv = ticketCanvas(1, previewMeta);
+          previewImg.src = cv.toDataURL(tkFormat === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
+        }, now ? 0 : 140);
+      }
 
       panel.querySelectorAll('[data-tk]').forEach(function (card) {
         card.addEventListener('click', function () {
@@ -1439,6 +1532,7 @@
           var box = document.getElementById('tk-custom');
           if (box) box.hidden = tkSel !== 'custom';
           store('codej-ticket-style', tkSel);
+          refreshPreview();
         });
       });
 
@@ -1446,6 +1540,7 @@
         inp.addEventListener('input', function () {
           tkCustom[inp.dataset.tc] = inp.value;
           store('codej-ticket-custom', JSON.stringify(tkCustom));
+          refreshPreview();
         });
       });
 
@@ -1454,6 +1549,7 @@
         tkFontSel.addEventListener('change', function () {
           tkFont = tkFontSel.value || 'yahei';
           store('codej-ticket-font', tkFont);
+          refreshPreview();
         });
       }
 
@@ -1461,16 +1557,26 @@
         inp.addEventListener('input', function () {
           tkCustom[inp.dataset.f] = inp.value;
           store('codej-ticket-custom', JSON.stringify(tkCustom));
+          refreshPreview();
         });
+      });
+
+      var fmt = document.getElementById('tk-format');
+      fmt.addEventListener('change', function () {
+        tkFormat = fmt.value === 'jpg' ? 'jpg' : 'png';
+        store('codej-ticket-format', tkFormat);
+        refreshPreview(true);
       });
 
       var gen = document.getElementById('tk-gen');
       gen.addEventListener('click', function () {
-        makeTicket();
+        saveTicket();
         var old = gen.innerHTML;
-        gen.innerHTML = '<i class="fas fa-check"></i> 已生成';
-        setTimeout(function () { gen.innerHTML = old; }, 1200);
+        gen.innerHTML = '<i class="fas fa-check"></i> ' + (isIOS() ? '已打开图片' : '已保存');
+        setTimeout(function () { gen.innerHTML = old; }, 1400);
       });
+
+      refreshPreview(true);
     }
 
     /* ---------- 放首音乐 ---------- */

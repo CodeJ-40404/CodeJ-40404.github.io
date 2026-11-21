@@ -247,7 +247,19 @@ html[data-theme="cyber"] .flicker { display: block; }
 html[data-theme="star"] #stars { display: block; }
 
 /* ---------- 液态玻璃主题特效 ---------- */
-html[data-theme="glass"] body {
+/* 背景放在独立的固定层：iOS Safari 不支持 body 的 background-attachment: fixed，
+   直接写在 body 上会随页面滚动、并按整页高度拉伸导致比例崩坏 */
+html[data-theme="glass"] body { background-image: none; }
+html[data-theme="glass"] body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--bg-image);
   background-size: 140% 140%, 140% 140%, 140% 140%, cover;
   background-repeat: repeat, repeat, repeat, no-repeat;
   background-position: center;
@@ -256,10 +268,6 @@ html[data-theme="glass"] body {
 @media (max-width: 1024px), (pointer: coarse) {
   html[data-theme="glass"] {
     --glass-photo: url('fengjing2.png');
-  }
-  html[data-theme="glass"] body {
-    background-size: 140% 140%, 140% 140%, 140% 140%, cover;
-    background-position: center;
   }
 }
 html[data-theme="glass"] .nav {
@@ -2055,6 +2063,62 @@ footer .flicker-word { color: var(--a2); animation: word-flicker 5s infinite; }
   border-radius: calc(var(--radius) * 0.5);
 }
 .tk-input:focus { outline: 1px solid var(--a1); }
+/* 车票预览 / 格式 / iOS 保存层 */
+.tk-preview-wrap {
+  margin: 2px 0 10px;
+  padding: 6px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) * 0.5);
+}
+.tk-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius) * 0.35);
+}
+.tk-preview-wrap span {
+  display: block;
+  margin-top: 4px;
+  text-align: center;
+  font-size: 0.5rem;
+  letter-spacing: 0.5px;
+  color: var(--dim);
+}
+.tk-format { display: flex; align-items: center; gap: 8px; }
+.tk-format > span { flex: none; font-size: 0.56rem; color: var(--dim); }
+.tk-format .style-select { flex: 1; width: auto; }
+.tk-save {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(4, 8, 14, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.tk-save[hidden] { display: none; }
+.tk-save-box { width: 100%; max-width: 640px; text-align: center; }
+.tk-save-box img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+}
+.tk-save-box p { margin: 12px 0 14px; font-size: 0.72rem; color: #eaf2ff; }
+.tk-save-box .dock-act {
+  display: inline-block;
+  flex: none;
+  width: auto;
+  min-width: 130px;
+}
 .dock-actions { display: flex; gap: 6px; margin-top: 10px; }
 .dock-act {
   flex: 1;
