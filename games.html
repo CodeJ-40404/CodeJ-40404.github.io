@@ -92,6 +92,34 @@
   }
   .games-footer-note i{ color: var(--a1); font-style: normal; }
 
+  /* ---------- 可下载的 Windows 游戏 ---------- */
+  .dl-heading{
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+    margin: 3rem 0 .5rem; font-size: 1.25rem; letter-spacing: 2px;
+    color: var(--a1); text-shadow: var(--glow-a1);
+  }
+  .os-badge{
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .2rem .6rem; font-size: .66rem; font-weight: 400;
+    letter-spacing: 1px; text-shadow: none;
+    color: var(--a3); border: 1px solid var(--a3); border-radius: 20px;
+  }
+  .dl-note{ margin: 0 0 1.4rem; color: var(--dim); font-size: .82rem; line-height: 1.8; }
+  .dl-note b{ color: var(--a3); }
+  .dl-card .game-cover{ background: #000; }
+  .dl-thumbs{ display: flex; gap: .4rem; padding: .7rem .9rem 0; flex-wrap: wrap; }
+  .dl-thumb{
+    width: 64px; height: 38px; padding: 0; cursor: pointer; overflow: hidden;
+    background: var(--panel2); border: 1px solid var(--line2);
+    border-radius: calc(var(--radius) * .5);
+    opacity: .6; transition: opacity .2s, border-color .2s, box-shadow .2s;
+  }
+  .dl-thumb img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dl-thumb:hover{ opacity: .9; }
+  .dl-thumb.is-active{ opacity: 1; border-color: var(--a1); box-shadow: 0 0 10px var(--glow-a1); }
+  .dl-card .game-play{ background: transparent; color: var(--a1); }
+  .dl-card .game-play:hover{ background: var(--a1); color: #000; }
+
   @media (max-width: 640px){
     .games-wrap{ padding: 1rem .8rem 3rem; }
     .games-title{ font-size: 1.3rem; }
@@ -110,8 +138,8 @@
   <header class="games-header">
     <h1 class="games-title">// GAME_ARCADE</h1>
     <p class="games-sub">
-      欢迎来到我的游戏厅。这里的每一款都是<b>纯网页小游戏</b>，点开即玩，无需下载。<br>
-      目前上架 <b>4</b> 款，后续有新作会继续丢进来。
+      欢迎来到我的游戏厅。上半区是<b>纯网页小游戏</b>，点开即玩，无需下载；下半区是<b>可下载的桌面游戏</b>，目前仅支持 Windows。<br>
+      现在共有 <b>4</b> 款网页游戏 + <b>4</b> 款可下载游戏，后续有新作会继续丢进来。
     </p>
   </header>
 
@@ -173,6 +201,87 @@
     </div>
   </div>
 
+  <h2 class="dl-heading">// DOWNLOAD_ZONE <span class="os-badge"><i class="fab fa-windows"></i> WINDOWS ONLY</span></h2>
+  <p class="dl-note">
+    以下为编译好的桌面游戏，<b>当前仅支持 Windows</b>，macOS / Linux 暂不可用。点击下载后双击 .exe 即可运行；
+    若被系统提示「已保护你的电脑」，选择「更多信息 → 仍要运行」即可。
+  </p>
+
+  <div class="games-grid">
+    <!-- Chemical-World -->
+    <div class="game-card dl-card">
+      <div class="game-cover">
+        <span class="cover-tag">Windows</span>
+        <img class="dl-main" src="chemicalworld1.png" alt="Chemical-World 游戏画面">
+      </div>
+      <div class="dl-thumbs">
+        <button class="dl-thumb is-active" type="button" data-src="chemicalworld1.png" aria-label="截图 1"><img src="chemicalworld1.png" alt=""></button>
+        <button class="dl-thumb" type="button" data-src="chemicalworld2%20(1).png" aria-label="截图 2"><img src="chemicalworld2%20(1).png" alt=""></button>
+        <button class="dl-thumb" type="button" data-src="chemicalworld2%20(2).png" aria-label="截图 3"><img src="chemicalworld2%20(2).png" alt=""></button>
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">Chemical-World</h2>
+        <p class="game-desc">我的主要项目：从一条熔炉产线开始，采集水、煤、沙，搭建设施、扩张营地，用化学反应堆出一整座化工帝国。终端界面，WASD 移动、E 交互，支持中英双语与存读档。</p>
+        <div class="game-meta"><span>C++</span><span>FTXUI</span><span>工业 · 生存</span><span>4.5 MB</span></div>
+        <a class="game-play" href="Chemical-World.exe" download>下载 · Windows <i class="fas fa-download"></i></a>
+      </div>
+    </div>
+
+    <!-- Spore -->
+    <div class="game-card dl-card">
+      <div class="game-cover">
+        <span class="cover-tag">Windows</span>
+        <img class="dl-main" src="spores%20(1).png" alt="Spore 细菌群落模拟画面">
+      </div>
+      <div class="dl-thumbs">
+        <button class="dl-thumb is-active" type="button" data-src="spores%20(1).png" aria-label="截图 1"><img src="spores%20(1).png" alt=""></button>
+        <button class="dl-thumb" type="button" data-src="spores%20(2).png" aria-label="截图 2"><img src="spores%20(2).png" alt=""></button>
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">Spore · 细菌群落</h2>
+        <p class="game-desc">上千个细菌在网格里争夺资源、互相捕食、杂交进化。观察基因分布、聚落扩张与生态崩坏，随时暂停、调速，查看统计图表与种群基因。</p>
+        <div class="game-meta"><span>C++</span><span>终端</span><span>生态模拟</span><span>3.8 MB</span></div>
+        <a class="game-play" href="spore.exe" download>下载 · Windows <i class="fas fa-download"></i></a>
+      </div>
+    </div>
+
+    <!-- Kingdoms -->
+    <div class="game-card dl-card">
+      <div class="game-cover">
+        <span class="cover-tag">Windows</span>
+        <img class="dl-main" src="kingdomsshot1.png" alt="王国斗蛐蛐游戏画面">
+      </div>
+      <div class="dl-thumbs">
+        <button class="dl-thumb is-active" type="button" data-src="kingdomsshot1.png" aria-label="截图 1"><img src="kingdomsshot1.png" alt=""></button>
+        <button class="dl-thumb" type="button" data-src="kingdomsshot2.png" aria-label="截图 2"><img src="kingdomsshot2.png" alt=""></button>
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">王国斗蛐蛐</h2>
+        <p class="game-desc">把战国群雄丢进一张 ASCII 天下舆图，让 AI 自己打：外交、宣战、结盟与背叛轮番上演。可随时切到任一国家接管，也能用种子复现同一局历史。</p>
+        <div class="game-meta"><span>C++</span><span>终端</span><span>策略</span><span>0.7 MB</span></div>
+        <a class="game-play" href="kingdoms.exe" download>下载 · Windows <i class="fas fa-download"></i></a>
+      </div>
+    </div>
+
+    <!-- ASCII Art -->
+    <div class="game-card dl-card">
+      <div class="game-cover">
+        <span class="cover-tag">Windows</span>
+        <img class="dl-main" src="asciiarts.png" alt="ASCII Art 转换效果">
+      </div>
+      <div class="dl-thumbs">
+        <button class="dl-thumb is-active" type="button" data-src="asciiarts.png" aria-label="截图 1"><img src="asciiarts.png" alt=""></button>
+        <button class="dl-thumb" type="button" data-src="asciiarts2.png" aria-label="截图 2"><img src="asciiarts2.png" alt=""></button>
+      </div>
+      <div class="game-body">
+        <h2 class="game-name">ASCII Art</h2>
+        <p class="game-desc">把一张图片转换成由字符拼成的 ASCII 艺术画，纯本地运行、无需联网。适合做终端风格的封面、头像和彩蛋素材。</p>
+        <div class="game-meta"><span>C++</span><span>工具</span><span>0.2 MB</span></div>
+        <a class="game-play" href="ascii_art.exe" download>下载 · Windows <i class="fas fa-download"></i></a>
+      </div>
+    </div>
+  </div>
+
   <p class="games-footer-note">MORE GAMES COMING SOON <i>//</i> 有新点子就开工</p>
 </div>
 
@@ -204,6 +313,20 @@ if(gThemeBtn){
   });
 }
 gApplyTheme(gCurrentTheme());
+
+/* 下载卡片：点击缩略图切换主图 */
+document.querySelectorAll('.dl-card').forEach(function(card){
+  var main = card.querySelector('.dl-main');
+  var thumbs = card.querySelectorAll('.dl-thumb');
+  if(!main || !thumbs.length) return;
+  thumbs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      main.src = btn.getAttribute('data-src');
+      thumbs.forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+    });
+  });
+});
 </script>
 </body>
 </html>
