@@ -16,6 +16,8 @@
   <!-- highlight.js 代码高亮 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
   <link rel="stylesheet" href="style.css">
+  <!-- 评论样式 -->
+  <link rel="stylesheet" href="comments.css">
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" defer></script>
@@ -54,10 +56,25 @@
       </div>
       <a class="article-back" href="index.html#blog">&lt;&lt; BACK_TO_BLOG</a>
     </article>
+
+    <!-- 评论 -->
+    <section class="comments" id="comments" aria-label="文章评论">
+      <div class="cm-head">
+        <h2 class="cm-title"><span class="mark">//</span> COMMENTS <span class="cm-count" id="cm-count"></span></h2>
+        <button class="cm-filter-btn" id="cm-filter-btn" type="button" title="管理本机屏蔽词">屏蔽词</button>
+      </div>
+      <div id="cm-body">
+        <p class="cm-tip">正在加载评论 ...</p>
+      </div>
+    </section>
   </main>
 
   <footer>
     <span class="hl">© 2026 CodeJ-40404</span> // POWERED BY MARKDOWN + KATEX
   </footer>
+
+  <!-- 评论：过滤模块需先于评论模块加载 -->
+  <script src="comment-filter.js" defer></script>
+  <script src="comments.js" defer></script>
 </body>
 </html>
