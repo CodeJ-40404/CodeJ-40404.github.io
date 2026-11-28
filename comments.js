@@ -1,6 +1,6 @@
 /* ============================================================
    CodeJ-40404.github.io — 文章评论（Supabase REST，无额外依赖）
-   依赖：comment-filter.js（提供 CommentFilter.mask / openManager）
+   依赖：comment-filter.js（提供 CommentFilter.mask）
    ============================================================ */
 (function () {
   'use strict';
@@ -238,16 +238,10 @@
     listEl = document.getElementById('cm-list');
     bindForm(document.getElementById('cm-form'));
 
-    var filterBtn = document.getElementById('cm-filter-btn');
-    if (filterBtn && window.CommentFilter) {
-      filterBtn.addEventListener('click', function () { window.CommentFilter.openManager(); });
-    }
-
     if (window.CommentFilter) {
       // 规则没加载完前先禁用提交，避免漏过滤
       if (submitBtn) submitBtn.disabled = true;
       window.CommentFilter.load().then(function () {
-        window.CommentFilter.onChange(renderList);
         if (submitBtn) submitBtn.disabled = false;
       });
     } else {
